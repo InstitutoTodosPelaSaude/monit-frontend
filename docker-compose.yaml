@@ -1,0 +1,13 @@
+version: '2'
+services:
+
+  streamlit:
+    build: ./streamlit
+    env_file:
+      - .env
+    ports:
+      - "8502:8501"
+    volumes:
+      - ./streamlit:/streamlit
+      - ./data:/data
+ 
