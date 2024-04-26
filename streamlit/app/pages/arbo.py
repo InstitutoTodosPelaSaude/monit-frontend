@@ -1,15 +1,10 @@
-
-# this file streamlit/app/pages/arbo.py
-# import path streamlit/widgets/monitoramento.py
-# add this path
-
 import streamlit as st
 from pathlib import Path
 import sys
 
-path = str(Path(__file__).resolve().parent.parent.parent)
-sys.path.append(path)
+sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-st.write(path)
+from page_widgets.monitoramento import UploadFilesWidget
 
-from widgets.monitoramento import UploadFilesWidget
+fl = UploadFilesWidget(st, key='1')
+fl.render()
