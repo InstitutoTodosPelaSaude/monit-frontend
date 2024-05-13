@@ -10,7 +10,9 @@ class FileSystem():
 
     def list_files_in_relative_path(self, relative_path, accepted_extensions=None):
         absolute_path = Path(self.root_path) / relative_path
-        all_files = self.list_files_in_relative_path(absolute_path)
+        
+        all_files = absolute_path.iterdir()
+
         if accepted_extensions:
             return [file for file in all_files if file.suffix in accepted_extensions]
         return all_files
