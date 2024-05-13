@@ -6,5 +6,15 @@ sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from page_widgets.monitoramento import UploadFilesWidget
 
-fl = UploadFilesWidget(st, key='1')
-fl.render()
+ROOT_PATH = '/data/arbo/data/'
+LABS = ['dbmol', 'einstein', 'fleury', 'hilab', 'hlagyn', 'sabin']
+
+
+upload_files_wdg = UploadFilesWidget(
+    st, 
+    key='upload_files_arbo', 
+    base_path=ROOT_PATH, 
+    labs=LABS
+)
+upload_files_wdg.render()
+

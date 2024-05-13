@@ -17,8 +17,6 @@ from models.filesystem import FileSystem
 class BaseWidget(ABC):
     """The base class for all Streamlit widgets."""
 
-    file_system = FileSystem
-
     def __init__(self, container=st, key=None):
         self.key = key
         self.container = container
