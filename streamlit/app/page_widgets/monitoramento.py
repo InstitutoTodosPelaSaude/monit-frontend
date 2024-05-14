@@ -177,3 +177,44 @@ class DownloadMatricesAndCombinedWidget(BaseWidget):
             help = "Download todos",
             key = f"download_all_combined_{self.base_path}"
         )
+
+
+class ListFilesInLabFolders(BaseWidget):
+
+    def __init__(
+            self, 
+            container, 
+            key=None, 
+            base_path='/', 
+            labs=[]
+    ):
+        super(ListFilesInLabFolders, self).__init__(container, key)
+        self.base_path = base_path
+        self.labs = labs
+        self.file_system = FileSystem(base_path)
+
+    def render(self):
+        self.container.markdown("## :file_folder: Arquivos")
+        
+        for lab in self.labs:
+            container = self.container.expander(f":file_folder: **{lab}**")
+            self.add_files_in_lab_folder(container, lab)
+        
+        self.container.divider()
+
+    def add_files_in_lab_folder(self, container, lab):
+        relative_path = f'{lab}/'
+        accepted_extensions = ['.tsv', '.csv', '.xslx', '.xls']
+
+        files = self.file_system.list_files_in_relative_path(relative_path, accepted_extensions)
+
+        if len(files) == 0:
+            container.text('Nenhum arquivo encontrado!')
+            return
+        
+        expander_container = self.container.expander(f":file_folder: **{lab}**")
+
+        for filename in files:
+            filename = str(filename).split('/')[-1]
+            expander_container.markdown(f'**{filename}**')
+            
