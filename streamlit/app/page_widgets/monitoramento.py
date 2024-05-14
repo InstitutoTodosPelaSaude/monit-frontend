@@ -89,7 +89,7 @@ class ListFileInPathWidget(BaseWidget):
             col_date.markdown(f'1d 24h')
             col_download.markdown(f':arrow_down:')
 
-class DownloadMatricesWidget(BaseWidget):
+class DownloadMatricesAndCombinedWidget(BaseWidget):
 
     def __init__(
             self, 
@@ -98,7 +98,7 @@ class DownloadMatricesWidget(BaseWidget):
             base_path='/', 
             labs=[]
     ):
-        super(DownloadMatricesWidget, self).__init__(container, key)
+        super(DownloadMatricesAndCombinedWidget, self).__init__(container, key)
         self.base_path = base_path
         self.labs = labs
         self.file_system = FileSystem(base_path)
@@ -147,11 +147,12 @@ class DownloadMatricesWidget(BaseWidget):
                 key = f"download_{self.base_path}_{filename}"
             )
 
-        self.add_button_download_all_matrices()
+        self.add_button_download_matrices()
+        self.add_button_download_combined()
         self.container.divider()
 
 
-    def add_button_download_all_matrices(self):
+    def add_button_download_matrices(self):
         
         zip_file_content, zip_file_name = self.file_system.get_path_contents_as_zip_file('matrices/', ['.tsv', '.csv'])
 
@@ -162,4 +163,17 @@ class DownloadMatricesWidget(BaseWidget):
             mime = "application/zip",
             help = "Download todos",
             key = f"download_all_matrices_{self.base_path}"
+        )
+
+    def add_button_download_combined(self):
+        
+        zip_file_content, zip_file_name = self.file_system.get_path_contents_as_zip_file('combined/', ['.tsv', '.csv'])
+
+        self.container.download_button(
+            label = ":arrow_down_small: Combined",
+            data = zip_file_content,
+            file_name = zip_file_name,
+            mime = "application/zip",
+            help = "Download todos",
+            key = f"download_all_combined_{self.base_path}"
         )

@@ -5,7 +5,7 @@ import sys
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from page_widgets.monitoramento import UploadFilesWidget
-from page_widgets.monitoramento import DownloadMatricesWidget
+from page_widgets.monitoramento import DownloadMatricesAndCombinedWidget
 
 ROOT_PATH = '/data/arbo/data/'
 LABS = ['dbmol', 'einstein', 'fleury', 'hilab', 'hlagyn', 'sabin']
@@ -20,7 +20,7 @@ upload_files_wdg = UploadFilesWidget(
 )
 upload_files_wdg.render()
 
-download_matrices_wdg = DownloadMatricesWidget(
+download_matrices_wdg = DownloadMatricesAndCombinedWidget(
     st, 
     key='download_matrices_arbo', 
     base_path=ROOT_PATH, 
