@@ -103,19 +103,21 @@ class DownloadMatricesWidget(BaseWidget):
         self.labs = labs
         self.file_system = FileSystem(base_path)
 
+
     def render(self):
         relative_path = 'matrices/'
+        accepted_extensions = ['.tsv', '.csv']
 
         self.container.markdown("## :1234: Download de matrizes")
         
         container = self.container.expander(f":file_folder: **Arquivos**")
-        files = self.file_system.list_files_in_relative_path(relative_path, ['.tsv', '.csv'])
+        file_contents = self.file_system.read_all_files_in_folder_as_dataframe(relative_path, accepted_extensions)
 
-        if len(files) == 0:
+        if len(file_contents) == 0:
             container.text('Nenhum arquivo encontrado!')
             return
         
-        for filename in files:
+        for filename, file_content in file_contents:
             filename = str(filename).split('/')[-1]
 
             col_filename, col_buttons = container.columns([.7, .3])
@@ -123,6 +125,13 @@ class DownloadMatricesWidget(BaseWidget):
 
             col_filename.markdown(f'{filename}')
             col_date.markdown(f'1d 24h')
-            col_download.markdown(f':arrow_down:')
+            col_download.download_button(
+                label = ":arrow_down:",
+                data = file_content,
+                file_name = filename,
+                mime = "text/csv",
+                help = "Download",
+                key = f"download_{self.base_path}_{filename}"
+            )
 
         self.container.divider()
