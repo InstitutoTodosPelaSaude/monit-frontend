@@ -216,5 +216,10 @@ class ListFilesInLabFolders(BaseWidget):
 
         for filename in files:
             filename = str(filename).split('/')[-1]
-            expander_container.markdown(f'**{filename}**')
+
+            col_filename, col_trash = expander_container.columns([.7, .3])
+            
+            col_filename.markdown(f':page_facing_up: {filename}')
+            # [WIP] Implement delete file -> MOVE FILE TO _out folder (trash)
+            col_trash.markdown(':wastebasket:')
             
