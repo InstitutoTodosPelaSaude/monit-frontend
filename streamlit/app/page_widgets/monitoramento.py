@@ -108,7 +108,7 @@ class DownloadMatricesWidget(BaseWidget):
         relative_path = 'matrices/'
         accepted_extensions = ['.tsv', '.csv']
 
-        self.container.markdown("## :1234: Download de matrizes")
+        self.container.markdown("## :1234: Matrizes")
         
         container = self.container.expander(f":file_folder: **Arquivos**")
         file_contents = self.file_system.read_all_files_in_folder_as_dataframe(relative_path, accepted_extensions)
@@ -117,14 +117,27 @@ class DownloadMatricesWidget(BaseWidget):
             container.text('Nenhum arquivo encontrado!')
             return
         
-        for filename, file_content in file_contents:
+        for filename, file_content, file_creation_time in file_contents:
             filename = str(filename).split('/')[-1]
 
             col_filename, col_buttons = container.columns([.7, .3])
             col_date, col_download, _ = col_buttons.columns([.3, .3, .3])
 
-            col_filename.markdown(f'{filename}')
-            col_date.markdown(f'1d 24h')
+            col_filename.markdown(filename)
+
+            if file_creation_time < 60:
+                duration = f"{file_creation_time:.0f}s"
+            elif file_creation_time < 3600:
+                duration = f"{file_creation_time//60:.0f}m"
+            elif file_creation_time < 86400:
+                duration = f"{file_creation_time//3600:.0f}h"
+            else:
+                days = file_creation_time//86400
+                hours = (file_creation_time%86400)//3600
+                duration = f"{days}d {hours}h"
+            
+            col_date.markdown(duration)
+
             col_download.download_button(
                 label = ":arrow_down:",
                 data = file_content,

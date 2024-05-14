@@ -10,6 +10,7 @@ from page_widgets.monitoramento import DownloadMatricesWidget
 ROOT_PATH = '/data/arbo/data/'
 LABS = ['dbmol', 'einstein', 'fleury', 'hilab', 'hlagyn', 'sabin']
 
+st.title("Central Arbo")
 
 upload_files_wdg = UploadFilesWidget(
     st, 

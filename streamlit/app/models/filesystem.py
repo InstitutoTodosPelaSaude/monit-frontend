@@ -2,7 +2,7 @@ import io
 from pathlib import Path
 import pandas as pd
 from datetime import datetime
-import io
+import os
 import zipfile
 
 class FileSystem():
@@ -35,8 +35,24 @@ class FileSystem():
     def read_all_files_in_folder_as_dataframe(self, relative_path, accepted_extensions=None):
         files = self.list_files_in_relative_path(relative_path, accepted_extensions)
         files.sort()
-        file_contents = [
-            (file, pd.read_csv(file).to_csv(index=False).encode('utf-8') )
-            for file in files
-        ]
+
+        dt_now = datetime.now()
+        dt_last_modification = lambda file:datetime.fromtimestamp(os.path.getmtime(file))
+
+        try:
+            file_contents = [
+                (
+                    file, 
+                    pd.read_csv(file).to_csv(index=False).encode('utf-8'), 
+                    (dt_now - dt_last_modification(file)).total_seconds() # Time in seconds since last modification
+                )
+                for file in files
+            ]
+
+        except Exception as e:
+            file_contents = [
+                ('UNABLE TO READ FILE', f'Error reading file: {e}'.encode('utf-8'), 0)
+                for file in files
+            ]
+
         return file_contents
