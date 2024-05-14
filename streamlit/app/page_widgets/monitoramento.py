@@ -147,4 +147,19 @@ class DownloadMatricesWidget(BaseWidget):
                 key = f"download_{self.base_path}_{filename}"
             )
 
+        self.add_button_download_all_matrices()
         self.container.divider()
+
+
+    def add_button_download_all_matrices(self):
+        
+        zip_file_content, zip_file_name = self.file_system.get_path_contents_as_zip_file('matrices/', ['.tsv', '.csv'])
+
+        self.container.download_button(
+            label = ":arrow_double_down: Download All",
+            data = zip_file_content,
+            file_name = zip_file_name,
+            mime = "application/zip",
+            help = "Download todos",
+            key = f"download_all_matrices_{self.base_path}"
+        )

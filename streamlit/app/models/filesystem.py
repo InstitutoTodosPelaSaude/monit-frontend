@@ -5,6 +5,7 @@ from datetime import datetime
 import os
 import zipfile
 
+
 class FileSystem():
     _instance = None
 
@@ -56,3 +57,17 @@ class FileSystem():
             ]
 
         return file_contents
+    
+
+    def get_path_contents_as_zip_file(self, relative_path, accepted_extensions):
+        file_content_list = self.read_all_files_in_folder_as_dataframe(relative_path, accepted_extensions)
+
+        zip_file_name = f"{relative_path.replace('/', '')}.zip"
+        zip_buffer = io.BytesIO()
+
+        with zipfile.ZipFile(zip_buffer, 'a', zipfile.ZIP_DEFLATED, False) as zip_file:
+            for filename, file_contents, _ in file_content_list:
+                filename = str(filename).split('/')[-1]
+                zip_file.writestr(filename, file_contents)
+
+        return zip_buffer.getvalue(), zip_file_name
