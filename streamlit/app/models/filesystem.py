@@ -71,3 +71,17 @@ class FileSystem():
                 zip_file.writestr(filename, file_contents)
 
         return zip_buffer.getvalue(), zip_file_name
+    
+
+    def move_file_to_folder(self, relative_path, file_name, target_folder):
+        absolute_path = Path(self.root_path) / relative_path
+        target_path = Path(self.root_path) / target_folder
+
+        try:
+            os.rename(absolute_path / file_name, target_path / file_name)
+            return True
+        except Exception as e:
+            print(f'Error moving file to folder: {e}')
+            return False
+        
+        
