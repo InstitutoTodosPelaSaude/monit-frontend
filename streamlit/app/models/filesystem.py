@@ -88,7 +88,8 @@ class FileSystem():
         except Exception as e:
             print(f'Error moving file to folder: {e}')
             return False
-            
+
+         
     def delete_file(self, relative_path):
         absolute_path = Path(self.root_path) / relative_path
 
@@ -98,5 +99,4 @@ class FileSystem():
         except Exception as e:
             print(f'Error deleting file: {e}')
             return False
-        
         
