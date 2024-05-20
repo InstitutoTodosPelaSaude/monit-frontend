@@ -89,6 +89,7 @@ class ListFileInPathWidget(BaseWidget):
             col_date.markdown(f'1d 24h')
             col_download.markdown(f':arrow_down:')
 
+
 class DownloadMatricesAndCombinedWidget(BaseWidget):
 
     def __init__(
@@ -229,3 +230,44 @@ class ListFilesInLabFolders(BaseWidget):
                     self.container.success(f'Arquivo {filename} movido para a lixeira!')
                 else:
                     self.container.error(f'Erro ao mover arquivo {filename} para a lixeira!')
+
+
+class ListFilesInTrashFolders(BaseWidget):
+
+    def __init__(
+            self, 
+            container, 
+            key=None, 
+            base_path='/', 
+            labs=[]
+    ):
+        super(ListFilesInTrashFolders, self).__init__(container, key)
+        self.base_path = base_path
+        self.labs = labs
+        self.file_system = FileSystem(base_path)
+
+    def render(self):
+        self.container.markdown("## :ok: Processados")
+        
+        for lab in self.labs:
+            container = self.container.expander(f":file_folder: **{lab}**")
+            self.add_files_in_lab_folder(container, lab)
+        
+        self.container.divider()
+
+    def add_files_in_lab_folder(self, container, lab):
+        relative_path = f'{lab}/_out/'
+        accepted_extensions = ['.tsv', '.csv', '.xslx', '.xls']
+
+        files = self.file_system.list_files_in_relative_path(relative_path, accepted_extensions)
+
+        if len(files) == 0:
+            container.text('Nenhum arquivo encontrado!')
+            return
+        
+        expander_container = self.container.expander(f":file_folder: **{lab}**")
+
+        for filename in files:
+            filename = str(filename).split('/')[-1]
+            col_filename, col_restore = expander_container.columns([.9, .1])
+            col_filename.markdown(f':page_facing_up: {filename}')
