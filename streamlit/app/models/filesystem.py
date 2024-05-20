@@ -26,6 +26,7 @@ class FileSystem():
         
         return all_files
     
+
     def save_content_in_file(self, relative_path, content, file_name):
         absolute_path = Path(self.root_path) / relative_path
         try:
@@ -86,6 +87,16 @@ class FileSystem():
             return True
         except Exception as e:
             print(f'Error moving file to folder: {e}')
+            return False
+            
+    def delete_file(self, relative_path):
+        absolute_path = Path(self.root_path) / relative_path
+
+        try:
+            os.remove(absolute_path)
+            return True
+        except Exception as e:
+            print(f'Error deleting file: {e}')
             return False
         
         

@@ -246,13 +246,16 @@ class ListFilesInTrashFolders(BaseWidget):
         self.labs = labs
         self.file_system = FileSystem(base_path)
 
+        self.selected_files = []
+
     def render(self):
         self.container.markdown("## :ok: Processados")
         
         for lab in self.labs:
             container = self.container.expander(f":file_folder: **{lab}**")
             self.add_files_in_lab_folder(container, lab)
-        
+
+        self.add_button_restore_and_delete()        
         self.container.divider()
 
     def add_files_in_lab_folder(self, container, lab):
@@ -271,3 +274,31 @@ class ListFilesInTrashFolders(BaseWidget):
             filename = str(filename).split('/')[-1]
             col_filename, col_restore = expander_container.columns([.9, .1])
             col_filename.markdown(f':page_facing_up: {filename}')
+
+            file_selected = col_restore.checkbox('', key=f'restore_{filename}')
+
+            if file_selected:
+                self.selected_files.append((lab, filename))
+
+    def add_button_restore_and_delete(self):
+
+        if len(self.selected_files) == 0:
+            return
+        
+        col_restore, col_delete, _, _ = self.container.columns([.2,.2,.4,.2])
+
+        restore_button = col_restore.button('Restaurar', key='restore_selected_files', use_container_width=True)
+        delete_button = col_delete.button('Deletar', key='delete_selected_files', type='primary', use_container_width=True)
+        type_to_delete = self.container.text_input("Digite 'DELETAR' para autorizar deleção", key='type_to_delete')
+
+        if restore_button:
+            self.container.success('Arquivos restaurados com sucesso!')
+
+            for folder, file in self.selected_files:
+                self.file_system.move_file_to_folder(folder + '/_out', file, folder)
+
+        if delete_button and type_to_delete == 'DELETAR':
+            self.container.error('Arquivos deletados com sucesso!')
+
+            for folder, file in self.selected_files:
+                self.file_system.delete_file(f'{folder}/_out/{file}')
