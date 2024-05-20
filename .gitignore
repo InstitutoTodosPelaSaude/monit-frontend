@@ -1,2 +1,6 @@
 .env
 __pycache__
+*.csv
+*.tsv
+data/arbo/*
+data/respat/*
