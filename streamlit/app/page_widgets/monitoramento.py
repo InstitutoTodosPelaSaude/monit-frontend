@@ -3,6 +3,8 @@ import sys
 
 from .base import BaseWidget
 from models.filesystem import FileSystem
+from models.database import DWDatabaseInterface, DagsterDatabaseInterface
+from collections import defaultdict
 
 class UploadFilesWidget(BaseWidget):
 
@@ -313,28 +315,64 @@ class LastRunOfEachLabInfoWidget(BaseWidget):
             self, 
             container, 
             key=None, 
-            base_path='/', 
-            labs=[]
+            base_path='/',
+            labs=[],
+            dw_database_connection_kwargs=None,
+            dagster_database_connection_kwargs=None
     ):
         super(LastRunOfEachLabInfoWidget, self).__init__(container, key)
         self.base_path = base_path
         self.labs = labs
-        self.file_system = FileSystem(base_path)
+        self.dw_database = DWDatabaseInterface(**dw_database_connection_kwargs)
+        self.dagster_database = DagsterDatabaseInterface(**dagster_database_connection_kwargs)
+
 
     def render(self):
-        self.container.markdown("## :arrows_counterclockwise: Última execução [WIP]")
+        self.container.markdown("## :arrows_counterclockwise: Última Run [WIP]")
         
+        # Retrieve last run for each lab
+        # format -> ID, lab, status, timestamp start, timestamp end
+        last_run_per_lab = self.dagster_database.get_last_run_for_each_pipeline()
+        lab_name_tuple_position = 1
+
         for lab in self.labs:
             container = self.container.container(border=True)
-            self.add_lab_last_run(container, lab)
+            # get the last run for the current lab
+            last_run_lab = filter(lambda x: x[lab_name_tuple_position] == f'"lab_{lab}"', last_run_per_lab)
+            last_run_lab = list(last_run_lab)
+            last_run_lab = last_run_lab[0]
+
+            self.add_lab_last_run(container, lab, last_run_lab)
+
+        for pipeline_name in ['combined', 'matrices']:
+            container = self.container.container(border=True)
+            last_run_lab = filter(lambda x: x[lab_name_tuple_position] == f'"{pipeline_name}"', last_run_per_lab)
+            last_run_lab = list(last_run_lab)
+            last_run_lab = last_run_lab[0]
+            self.add_lab_last_run(container, pipeline_name, last_run_lab)
         
         self.container.divider()
 
-    def add_lab_last_run(self, container, lab):
+
+    def add_lab_last_run(self, container, lab, last_run_lab):
         col_name, col_status, col_last_info, col_epiweek_count = container.columns([.15, .2, .2, .45])
-        col_name.markdown(f"**{lab}**")
 
-        self.add_lab_last_run_status(col_status, lab)
+        last_run_status = last_run_lab[2]
+        last_run_start = last_run_lab[3]
+        last_run_end = last_run_lab[4]
 
-    def add_lab_last_run_status(self, container, lab):
-        container.markdown(f":white_check_mark: 14 May 22:28")
+        col_name.markdown(f"**{lab.capitalize()}**")
+        self.add_lab_last_run_status(col_status, last_run_status, last_run_start)
+
+
+    def add_lab_last_run_status(self, container, status, last_run_start):
+
+        STATUS_TO_EMOJI = defaultdict(lambda: ':question:')
+        STATUS_TO_EMOJI['FAILURE'] = ':x:'
+        STATUS_TO_EMOJI['SUCCESS'] = ':white_check_mark:'
+        STATUS_TO_EMOJI['CANCELED'] = ':x:'
+
+        status_emoji = STATUS_TO_EMOJI[status]
+        run_start_time = last_run_start.strftime("%d %b %H:%M")
+
+        container.markdown(f"{status_emoji} {run_start_time}")
