@@ -191,6 +191,12 @@ class DWDatabaseInterface (PostgresqlDatabaseInterface):
         epiweeks = self.get_epiweek_number_of_latest_epiweeks()
         lab_counts_by_epiweek = self.get_number_of_tests_per_lab_and_epiweek_in_this_year()
         
+        if epiweeks is None:
+            return None
+        
+        if lab_counts_by_epiweek is None:
+            return None
+
         epiweeks = [ epiweek[0] for epiweek in epiweeks ]
         if lab_counts_by_epiweek is None:
             return None

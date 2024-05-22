@@ -349,10 +349,12 @@ class LastRunOfEachLabInfoWidget(BaseWidget):
             col_name, col_status, col_last_info, col_epiweek_count = container.columns([.15, .2, .2, .45])
 
             # get the last run for the current lab
+            last_run_per_lab = last_run_per_lab or []
             last_run_lab = filter(lambda x: x[1] == f'"lab_{lab}"', last_run_per_lab)
             last_run_lab = list(last_run_lab)
 
             # get the latest date of data for the current lab
+            latest_date_per_lab = latest_date_per_lab or []
             latest_date_lab = filter(lambda x: x[0] == lab.upper(), latest_date_per_lab)
             latest_date_lab = list(latest_date_lab)
 
