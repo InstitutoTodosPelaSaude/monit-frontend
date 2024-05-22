@@ -5,6 +5,7 @@ from .base import BaseWidget
 from models.filesystem import FileSystem
 from models.database import DWDatabaseInterface, DagsterDatabaseInterface
 from collections import defaultdict
+from datetime import datetime
 
 class UploadFilesWidget(BaseWidget):
 
@@ -333,46 +334,68 @@ class LastRunOfEachLabInfoWidget(BaseWidget):
         # Retrieve last run for each lab
         # format -> ID, lab, status, timestamp start, timestamp end
         last_run_per_lab = self.dagster_database.get_last_run_for_each_pipeline()
-        lab_name_tuple_position = 1
+
+        # format -> lab (UPPERCASE), latest date
+        latest_date_per_lab  = self.dw_database.get_latest_date_of_lab_data()
 
         for lab in self.labs:
             container = self.container.container(border=True)
-            # get the last run for the current lab
-            last_run_lab = filter(lambda x: x[lab_name_tuple_position] == f'"lab_{lab}"', last_run_per_lab)
-            last_run_lab = list(last_run_lab)
-            last_run_lab = last_run_lab[0]
+            col_name, col_status, col_last_info, col_epiweek_count = container.columns([.15, .2, .2, .45])
 
-            self.add_lab_last_run(container, lab, last_run_lab)
+            # get the last run for the current lab
+            last_run_lab = filter(lambda x: x[1] == f'"lab_{lab}"', last_run_per_lab)
+            last_run_lab = list(last_run_lab)
+
+            # get the latest date of data for the current lab
+            latest_date_lab = filter(lambda x: x[0] == lab.upper(), latest_date_per_lab)
+            latest_date_lab = list(latest_date_lab)
+
+            col_name.markdown(f"**{lab.capitalize()}**")
+            self.add_lab_last_run_status(col_status, last_run_lab)
+            self.add_lab_latest_date(col_last_info, latest_date_lab)
 
         for pipeline_name in ['combined', 'matrices']:
             container = self.container.container(border=True)
-            last_run_lab = filter(lambda x: x[lab_name_tuple_position] == f'"{pipeline_name}"', last_run_per_lab)
+            col_name, col_status, _, _ = container.columns([.15, .2, .2, .45])
+
+            last_run_lab = filter(lambda x: x[1] == f'"{pipeline_name}"', last_run_per_lab)
             last_run_lab = list(last_run_lab)
-            last_run_lab = last_run_lab[0]
-            self.add_lab_last_run(container, pipeline_name, last_run_lab)
+
+            col_name.markdown(f"**{pipeline_name.capitalize()}**")
+            self.add_lab_last_run_status(col_status, last_run_lab)
         
         self.container.divider()
 
+    
+    def add_lab_latest_date(self, container, latest_date_lab):
 
-    def add_lab_last_run(self, container, lab, last_run_lab):
-        col_name, col_status, col_last_info, col_epiweek_count = container.columns([.15, .2, .2, .45])
+        if len(latest_date_lab) == 0:
+            container.markdown(f"_Sem Dados_")
+            return
+        
+
+        latest_date_lab = latest_date_lab[0]
+        latest_date = latest_date_lab[1]
+        latest_date = latest_date.strftime("%b %d")
+        container.markdown(f"_Dados até {latest_date}_")
+
+
+    def add_lab_last_run_status(self, container, last_run_lab):
+
+        if len(last_run_lab) == 0:
+            last_run_lab = [None, '?', datetime.now(), datetime.now(), None]
+        else:
+            last_run_lab = last_run_lab[0]
 
         last_run_status = last_run_lab[2]
         last_run_start = last_run_lab[3]
-        last_run_end = last_run_lab[4]
-
-        col_name.markdown(f"**{lab.capitalize()}**")
-        self.add_lab_last_run_status(col_status, last_run_status, last_run_start)
-
-
-    def add_lab_last_run_status(self, container, status, last_run_start):
 
         STATUS_TO_EMOJI = defaultdict(lambda: ':question:')
         STATUS_TO_EMOJI['FAILURE'] = ':x:'
         STATUS_TO_EMOJI['SUCCESS'] = ':white_check_mark:'
         STATUS_TO_EMOJI['CANCELED'] = ':x:'
 
-        status_emoji = STATUS_TO_EMOJI[status]
+        status_emoji = STATUS_TO_EMOJI[last_run_status]
         run_start_time = last_run_start.strftime("%d %b %H:%M")
 
         container.markdown(f"{status_emoji} {run_start_time}")
