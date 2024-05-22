@@ -7,6 +7,9 @@ from models.database import DWDatabaseInterface, DagsterDatabaseInterface
 from collections import defaultdict
 from datetime import datetime
 
+import matplotlib.pyplot as plt
+import pandas as pd
+
 class UploadFilesWidget(BaseWidget):
 
     def __init__(
@@ -338,6 +341,9 @@ class LastRunOfEachLabInfoWidget(BaseWidget):
         # format -> lab (UPPERCASE), latest date
         latest_date_per_lab  = self.dw_database.get_latest_date_of_lab_data()
 
+        # format -> lab-epiweek, test count
+        lab_epiweeks_count = self.dw_database.get_number_of_tests_per_lab_in_latest_epiweeks()
+
         for lab in self.labs:
             container = self.container.container(border=True)
             col_name, col_status, col_last_info, col_epiweek_count = container.columns([.15, .2, .2, .45])
@@ -353,6 +359,7 @@ class LastRunOfEachLabInfoWidget(BaseWidget):
             col_name.markdown(f"**{lab.capitalize()}**")
             self.add_lab_last_run_status(col_status, last_run_lab)
             self.add_lab_latest_date(col_last_info, latest_date_lab)
+            self.add_lab_epiweek_count_plot(lab.upper(), col_epiweek_count, lab_epiweeks_count)
 
         for pipeline_name in ['combined', 'matrices']:
             container = self.container.container(border=True)
@@ -373,7 +380,6 @@ class LastRunOfEachLabInfoWidget(BaseWidget):
             container.markdown(f"_Sem Dados_")
             return
         
-
         latest_date_lab = latest_date_lab[0]
         latest_date = latest_date_lab[1]
         latest_date = latest_date.strftime("%b %d")
@@ -399,3 +405,69 @@ class LastRunOfEachLabInfoWidget(BaseWidget):
         run_start_time = last_run_start.strftime("%d %b %H:%M")
 
         container.markdown(f"{status_emoji} {run_start_time}")
+
+    def add_lab_epiweek_count_plot(self, lab, container, lab_epiweeks_count):
+
+        if lab_epiweeks_count == None or len(lab_epiweeks_count) == 0:
+            return
+        
+        lab = lab.upper()
+        tem_dados = False
+
+        lab_epiweeks_count = lab_epiweeks_count.items()
+        lab_epiweeks_count = [ [*lab_epiweek.split('-'), count ] for lab_epiweek, count in lab_epiweeks_count ]
+        lab_epiweeks_count_df = pd.DataFrame(lab_epiweeks_count, columns=['Lab', 'Epiweek', 'Count'])
+        lab_epiweeks_count_df['Lab'] = lab_epiweeks_count_df['Lab'].str.upper()
+        lab_epiweeks_count_df = lab_epiweeks_count_df.query(f"Lab=='{lab}'")
+
+        if len(lab_epiweeks_count_df) == 0:
+            container.markdown(f"*Sem dados*")
+            return
+
+        # container.write(lab_epiweeks_count_df)
+
+        df_chart_data = lab_epiweeks_count_df
+        df_chart_data = df_chart_data.sort_values(by='Epiweek', ascending=True)
+        fig = plt.figure( figsize=(10, 1) )
+        # remove border
+        fig.gca().spines['top'].set_visible(False)
+        fig.gca().spines['right'].set_visible(False)
+        fig.gca().spines['left'].set_visible(False)
+        ax = df_chart_data.plot(
+            x='Epiweek', 
+            y='Count', 
+            kind='bar', 
+            ax=fig.gca(), 
+            color='#00a6ed',
+            # bar width
+            width=0.5
+        )
+        # remove y-label
+        ax.set_ylabel('')
+        ax.set_xlabel('')
+        # remove legend
+        ax.get_legend().remove()
+        # increase x-ticks font size
+        ax.tick_params(axis='x', labelsize=20)
+        # remove y-ticks
+        ax.set_yticks([])
+        # add the value on top of each bar
+        for p in ax.patches:
+            if p.get_height() <= 0:
+                continue
+            tem_dados = True
+            ax.annotate(
+                f"{p.get_height()}",
+                (p.get_x() + p.get_width() / 2., p.get_height()),
+                ha='center',
+                va='center',
+                fontsize=16,
+                color='black',
+                xytext=(0, 10),
+                textcoords='offset points'
+            )
+
+        if not tem_dados:
+            container.markdown(f"*Sem dados*")
+            return
+        container.pyplot(fig)
