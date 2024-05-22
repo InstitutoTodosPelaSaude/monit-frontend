@@ -63,13 +63,7 @@ class DagsterDatabaseInterface (PostgresqlDatabaseInterface):
 
     # define static method for singleton pattern
     @staticmethod
-    def get_instance():
-        user = os.getenv("DB_DAGSTER_USER")
-        password = os.getenv("DB_DAGSTER_PASSWORD")
-        host = os.getenv("DB_DAGSTER_HOST")
-        port = os.getenv("DB_DAGSTER_PORT")
-        database = os.getenv("DB_DAGSTER_DATABASE")
-
+    def get_instance(user, password, host, port, database):
         if not hasattr(DagsterDatabaseInterface, "__instance"):
             DagsterDatabaseInterface.__instance = DagsterDatabaseInterface( 
                 user, password, host, port, database 
@@ -121,18 +115,12 @@ class DWDatabaseInterface (PostgresqlDatabaseInterface):
 
     # define static method for singleton pattern
     @staticmethod
-    def get_instance():
-        user = os.getenv("DB_USER")
-        password = os.getenv("DB_PASSWORD")
-        host = os.getenv("DB_HOST")
-        port = os.getenv("DB_PORT")
-        database = os.getenv("DB_NAME")
-
-        if not hasattr(DWDatabaseInterface, "__instance"):
-            DWDatabaseInterface.__instance = DWDatabaseInterface( 
+    def get_instance(user, password, host, port, database):
+        if not hasattr(DagsterDatabaseInterface, "__instance"):
+            DagsterDatabaseInterface.__instance = DagsterDatabaseInterface( 
                 user, password, host, port, database 
             )
-        return DWDatabaseInterface.__instance
+        return DagsterDatabaseInterface.__instance
     
     def __init__(self, user, password, host, port, database):
         super().__init__(user, password, host, port, database)
