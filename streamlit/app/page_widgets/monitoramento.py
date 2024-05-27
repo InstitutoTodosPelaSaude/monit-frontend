@@ -332,7 +332,7 @@ class LastRunOfEachLabInfoWidget(BaseWidget):
 
 
     def render(self):
-        self.container.markdown("## :arrows_counterclockwise: Última Run [WIP]")
+        self.container.markdown("## :arrows_counterclockwise: Última Run")
         
         # Retrieve last run for each lab
         # format -> ID, lab, status, timestamp start, timestamp end
@@ -473,3 +473,22 @@ class LastRunOfEachLabInfoWidget(BaseWidget):
             container.markdown(f"*Sem dados*")
             return
         container.pyplot(fig)
+
+
+class DagsterLinkWidget(BaseWidget):
+
+    def __init__(
+            self, 
+            container, 
+            key=None, 
+            dagster_link=""
+    ):
+        super(DagsterLinkWidget, self).__init__(container, key)
+        self.dagster_link = dagster_link
+
+    def render(self):
+        self.container.link_button(
+            "**Acessar o Dagster :octopus:**", 
+            self.dagster_link, 
+            use_container_width=True
+        )
