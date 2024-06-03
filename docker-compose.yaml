@@ -5,10 +5,19 @@ services:
     build: ./streamlit
     env_file:
       - .env
-    ports:
-      - "8502:8501"
     volumes:
       - ./streamlit:/streamlit
       - ./data:/data
       - ./streamlit/.streamlit:/root/.streamlit
- 
+
+  nginx:
+    build: ./nginx
+    env_file:
+      - .env
+    environment:
+      BASIC_USERNAME: ${DAGSTER_UI_USERNAME}
+      BASIC_PASSWORD: ${DAGSTER_UI_PASSWORD}
+    depends_on:
+      - streamlit
+    ports:
+      - "80:80"
