@@ -26,7 +26,7 @@ DB_DAGSTER_ARBO_USER     = os.getenv("DB_DAGSTER_ARBO_USER")
 DB_DAGSTER_ARBO_PASSWORD = os.getenv("DB_DAGSTER_ARBO_PASSWORD")
 DB_DAGSTER_ARBO_DATABASE = os.getenv("DB_DAGSTER_ARBO_DATABASE")
 
-DASGSTER_LINK = os.getenv("ARBO_DAGSTER_LINK")
+DASGSTER_LINK            = os.getenv("ARBO_DAGSTER_LINK")
 
 LABS = ['dbmol', 'einstein', 'fleury', 'hilab', 'hlagyn', 'sabin']
 
