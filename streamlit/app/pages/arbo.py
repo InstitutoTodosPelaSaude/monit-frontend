@@ -70,7 +70,7 @@ last_run_of_each_lab = LastRunOfEachLabInfoWidget(
     }
 )
 
-labs_dagster_link = DagsterLinkWidget(st, DASGSTER_LINK)
+labs_dagster_link = DagsterLinkWidget(st, dagster_link=DASGSTER_LINK)
 
 
 upload_files_wdg.render()
