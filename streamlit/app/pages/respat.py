@@ -11,6 +11,7 @@ from page_widgets.monitoramento import ListFilesInLabFoldersWidget
 from page_widgets.monitoramento import ListFilesInTrashFoldersWidget
 from page_widgets.monitoramento import LastRunOfEachLabInfoWidget
 from page_widgets.monitoramento import DagsterLinkWidget
+from page_widgets.monitoramento import LinkToHomeWidget
 
 ROOT_PATH = '/data/respat/data/'
 
@@ -72,6 +73,7 @@ last_run_of_each_lab = LastRunOfEachLabInfoWidget(
 
 labs_dagster_link = DagsterLinkWidget(st, dagster_link=DASGSTER_LINK)
 
+link_to_home = LinkToHomeWidget(st)
 
 upload_files_wdg.render()
 download_matrices_wdg.render()
@@ -79,3 +81,4 @@ list_files_in_lab_folders.render()
 list_files_in_trash_folders.render()
 last_run_of_each_lab.render()
 labs_dagster_link.render()
+link_to_home.render()

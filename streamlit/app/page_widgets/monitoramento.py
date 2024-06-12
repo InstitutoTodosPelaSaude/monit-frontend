@@ -492,3 +492,15 @@ class DagsterLinkWidget(BaseWidget):
             self.dagster_link, 
             use_container_width=True
         )
+
+class LinkToHomeWidget(BaseWidget):
+
+    def __init__(
+            self, 
+            container, 
+            key=None
+    ):
+        super(LinkToHomeWidget, self).__init__(container, key)
+
+    def render(self):
+        self.container.page_link("main.py", label="Home", icon="⬅️")
