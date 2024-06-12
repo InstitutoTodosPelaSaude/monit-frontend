@@ -283,7 +283,7 @@ class ListFilesInTrashFoldersWidget(BaseWidget):
             col_filename, col_restore = expander_container.columns([.9, .1])
             col_filename.markdown(f':page_facing_up: {filename}')
 
-            file_selected = col_restore.checkbox('', key=f'restore_{filename}')
+            file_selected = col_restore.checkbox('', key=f'restore_{lab}_{filename}')
 
             if file_selected:
                 self.selected_files.append((lab, filename))
