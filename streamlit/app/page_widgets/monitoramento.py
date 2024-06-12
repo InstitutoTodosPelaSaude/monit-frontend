@@ -211,7 +211,7 @@ class ListFilesInLabFoldersWidget(BaseWidget):
 
     def add_files_in_lab_folder(self, container, lab):
         relative_path = f'{lab}/'
-        accepted_extensions = ['.tsv', '.csv', '.xslx', '.xls']
+        accepted_extensions = ['.tsv', '.csv', '.xlsx', '.xls']
 
         files = self.file_system.list_files_in_relative_path(relative_path, accepted_extensions)
 
@@ -268,7 +268,7 @@ class ListFilesInTrashFoldersWidget(BaseWidget):
 
     def add_files_in_lab_folder(self, container, lab):
         relative_path = f'{lab}/_out/'
-        accepted_extensions = ['.tsv', '.csv', '.xslx', '.xls']
+        accepted_extensions = ['.tsv', '.csv', '.xlsx', '.xls']
 
         files = self.file_system.list_files_in_relative_path(relative_path, accepted_extensions)
 
