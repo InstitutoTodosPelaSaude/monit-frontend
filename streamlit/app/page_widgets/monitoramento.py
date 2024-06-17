@@ -504,3 +504,37 @@ class LinkToHomeWidget(BaseWidget):
 
     def render(self):
         self.container.page_link("main.py", label="Home", icon="⬅️")
+
+class ITPSFooterWidget(BaseWidget):
+
+    def __init__(
+            self, 
+            container,
+            file_path, 
+            key=None
+    ):
+        super(ITPSFooterWidget, self).__init__(container, key)
+        self.file_path = file_path
+
+    def render(self):
+        file_content = self.read_version_file()
+
+        try:
+            commit_hash, commit_date = file_content.split(' ')
+        except:
+            commit_hash, commit_date = 'UNK_COMMIT', 'UNK_DATE'
+
+        self.container.write("#")
+        self.container.divider()
+        self.container.markdown(f"DEVELOPED BY [ITpS](https://www.itps.org.br/). lc-{commit_hash}, {commit_date}.")
+
+
+    def read_version_file(self):
+        file_content = "UNK_COMMIT UNK_DATE"
+        try:
+            with open(self.file_path + 'version.txt', 'r') as file:
+                file_content = file.read()
+        except:
+            pass
+
+        return file_content
