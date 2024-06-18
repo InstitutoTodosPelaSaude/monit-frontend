@@ -38,6 +38,16 @@ class FileSystem():
             return False
         
 
+    def get_file_content_as_io_bytes(self, relative_path):
+        absolute_path = Path(self.root_path) / relative_path
+        try:
+            with open(absolute_path, 'rb') as file:
+                return io.BytesIO(file.read())
+        except Exception as e:
+            print(f'Error getting file content as io bytes: {e}')
+            return None
+        
+
     def read_all_files_in_folder_as_dataframe(self, relative_path, accepted_extensions=None):
         files = self.list_files_in_relative_path(relative_path, accepted_extensions)
         files.sort()

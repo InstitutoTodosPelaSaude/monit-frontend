@@ -174,12 +174,16 @@ class DownloadMatricesAndCombinedWidget(BaseWidget):
 
     def add_button_download_combined(self):
         
-        zip_file_content, zip_file_name = self.file_system.get_path_contents_as_zip_file('combined/', ['.tsv', '.csv'])
+        combined_content = self.file_system.get_file_content_as_io_bytes('combined/combined.zip')
+
+        if combined_content is None:
+            self.container.error('Não foi possível encontrar o arquivo combined.zip!')
+            return
 
         self.container.download_button(
             label = ":arrow_down_small: Combined",
-            data = zip_file_content,
-            file_name = zip_file_name,
+            data = combined_content,
+            file_name = 'combined.zip',
             mime = "application/zip",
             help = "Download todos",
             key = f"download_all_combined_{self.base_path}"
