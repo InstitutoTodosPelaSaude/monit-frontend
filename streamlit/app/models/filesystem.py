@@ -48,7 +48,7 @@ class FileSystem():
             return None
         
 
-    def read_all_files_in_folder_as_dataframe(self, relative_path, accepted_extensions=None):
+    def read_all_files_in_folder_as_buffer(self, relative_path, accepted_extensions=None):
         files = self.list_files_in_relative_path(relative_path, accepted_extensions)
         files.sort()
 
@@ -59,7 +59,7 @@ class FileSystem():
             file_contents = [
                 (
                     file, 
-                    pd.read_csv(file).to_csv(index=False).encode('utf-8'), 
+                    open(file, 'rb').read(),
                     (dt_now - dt_last_modification(file)).total_seconds() # Time in seconds since last modification
                 )
                 for file in files
@@ -75,7 +75,7 @@ class FileSystem():
     
 
     def get_path_contents_as_zip_file(self, relative_path, accepted_extensions):
-        file_content_list = self.read_all_files_in_folder_as_dataframe(relative_path, accepted_extensions)
+        file_content_list = self.read_all_files_in_folder_as_buffer(relative_path, accepted_extensions)
 
         zip_file_name = f"{relative_path.replace('/', '')}.zip"
         zip_buffer = io.BytesIO()

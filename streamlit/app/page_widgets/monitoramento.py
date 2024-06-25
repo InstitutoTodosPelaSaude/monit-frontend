@@ -113,12 +113,12 @@ class DownloadMatricesAndCombinedWidget(BaseWidget):
 
     def render(self):
         relative_path = 'matrices/'
-        accepted_extensions = ['.tsv', '.csv']
+        accepted_extensions = ['.tsv', '.csv', '.xlsx', '.xls']
 
         self.container.markdown("## :1234: Matrizes")
         
         container = self.container.expander(f":file_folder: **Arquivos**")
-        file_contents = self.file_system.read_all_files_in_folder_as_dataframe(relative_path, accepted_extensions)
+        file_contents = self.file_system.read_all_files_in_folder_as_buffer(relative_path, accepted_extensions)
 
         if len(file_contents) == 0:
             container.text('Nenhum arquivo encontrado!')
