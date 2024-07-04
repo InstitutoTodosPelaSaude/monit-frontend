@@ -161,7 +161,7 @@ class DownloadMatricesAndCombinedWidget(BaseWidget):
 
     def add_button_download_matrices(self):
         
-        zip_file_content, zip_file_name = self.file_system.get_path_contents_as_zip_file('matrices/', ['.tsv', '.csv'])
+        zip_file_content, zip_file_name = self.file_system.get_path_contents_as_zip_file('matrices/', ['.tsv', '.csv', '.xlsx', '.xls'])
 
         self.container.download_button(
             label = ":arrow_double_down: Download All",
