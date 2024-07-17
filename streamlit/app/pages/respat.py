@@ -21,7 +21,7 @@ DB_PASSWORD                = os.getenv("DB_RESPAT_PASSWORD")
 DB_HOST                    = os.getenv("DB_RESPAT_HOST")
 DB_PORT                    = os.getenv("DB_RESPAT_PORT")
 DB_DATABASE                = os.getenv("DB_RESPAT_DATABASE")
-DB_SCHEMA                  = '"respiratorios"'
+DB_SCHEMA                  = 'respiratorios'
 
 DB_DAGSTER_RESPAT_HOST     = os.getenv("DB_DAGSTER_RESPAT_HOST")
 DB_DAGSTER_RESPAT_PORT     = os.getenv("DB_DAGSTER_RESPAT_PORT")
