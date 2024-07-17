@@ -21,6 +21,7 @@ DB_PASSWORD                = os.getenv("DB_RESPAT_PASSWORD")
 DB_HOST                    = os.getenv("DB_RESPAT_HOST")
 DB_PORT                    = os.getenv("DB_RESPAT_PORT")
 DB_DATABASE                = os.getenv("DB_RESPAT_DATABASE")
+DB_SCHEMA                  = '"respiratorios"'
 
 DB_DAGSTER_RESPAT_HOST     = os.getenv("DB_DAGSTER_RESPAT_HOST")
 DB_DAGSTER_RESPAT_PORT     = os.getenv("DB_DAGSTER_RESPAT_PORT")
@@ -61,7 +62,8 @@ last_run_of_each_lab = LastRunOfEachLabInfoWidget(
         'password': DB_PASSWORD,
         'host': DB_HOST,
         'port': DB_PORT,
-        'database': DB_DATABASE
+        'database': DB_DATABASE,
+        'default_schema': DB_SCHEMA
     },
     dagster_database_connection_kwargs={
         'user': DB_DAGSTER_RESPAT_USER,

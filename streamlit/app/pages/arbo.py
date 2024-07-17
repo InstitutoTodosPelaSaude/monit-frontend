@@ -21,6 +21,7 @@ DB_PASSWORD              = os.getenv("DB_ARBO_PASSWORD")
 DB_HOST                  = os.getenv("DB_ARBO_HOST")
 DB_PORT                  = os.getenv("DB_ARBO_PORT")
 DB_DATABASE              = os.getenv("DB_ARBO_DATABASE")
+DB_SCHEMA                = '"arboviroses"'
 
 DB_DAGSTER_ARBO_HOST     = os.getenv("DB_DAGSTER_ARBO_HOST")
 DB_DAGSTER_ARBO_PORT     = os.getenv("DB_DAGSTER_ARBO_PORT")
@@ -61,7 +62,8 @@ last_run_of_each_lab = LastRunOfEachLabInfoWidget(
         'password': DB_PASSWORD,
         'host': DB_HOST,
         'port': DB_PORT,
-        'database': DB_DATABASE
+        'database': DB_DATABASE,
+        'default_schema': DB_SCHEMA
     },
     dagster_database_connection_kwargs={
         'user': DB_DAGSTER_ARBO_USER,

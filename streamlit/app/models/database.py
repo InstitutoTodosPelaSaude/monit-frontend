@@ -116,28 +116,29 @@ class DWDatabaseInterface (PostgresqlDatabaseInterface):
     # define static method for singleton pattern
     @staticmethod
     def get_instance(user, password, host, port, database):
-        if not hasattr(DagsterDatabaseInterface, "__instance"):
-            DagsterDatabaseInterface.__instance = DagsterDatabaseInterface( 
+        if not hasattr(DWDatabaseInterface, "__instance"):
+            DWDatabaseInterface.__instance = DWDatabaseInterface( 
                 user, password, host, port, database 
             )
-        return DagsterDatabaseInterface.__instance
+        return DWDatabaseInterface.__instance
     
-    def __init__(self, user, password, host, port, database):
+    def __init__(self, user, password, host, port, database, default_schema):
         super().__init__(user, password, host, port, database)
+        self.default_schema = default_schema
 
     def get_list_of_files_already_processed(self):
-        query = """
+        query = f"""
             SELECT DISTINCT LOWER(lab_id) || '/' || file_name AS file_path
-            FROM "arboviroses"."combined_01_join_labs"
+            FROM "{self.default_schema}"."combined_01_join_labs"
         """
 
         records = super().query(query)
         return records
     
     def get_latest_date_of_lab_data(self):
-        query = """
+        query = f"""
             SELECT lab_id, MAX(date_testing) AS last_date
-            FROM "arboviroses"."combined_01_join_labs"
+            FROM "{self.default_schema}"."combined_01_join_labs"
             GROUP BY lab_id
         """
 
@@ -145,22 +146,22 @@ class DWDatabaseInterface (PostgresqlDatabaseInterface):
         return records
     
     def get_list_of_all_labs(self):
-        query = """
+        query = f"""
             SELECT DISTINCT lab_id
-            FROM "arboviroses"."combined_01_join_labs"
+            FROM "{self.default_schema}"."combined_01_join_labs"
         """
 
         records = super().query(query)
         return records
     
     def get_number_of_tests_per_lab_and_epiweek_in_this_year(self):
-        query = """
+        query = f"""
             SELECT
                 lab_id, 
                 epiweek_number, 
                 COUNT(*)
             FROM
-                arboviroses.combined_05_location
+                {self.default_schema}.combined_05_location
             WHERE EXTRACT(YEAR FROM date_testing) = EXTRACT(YEAR FROM CURRENT_DATE)
             GROUP BY lab_id, epiweek_number
         """
@@ -169,7 +170,7 @@ class DWDatabaseInterface (PostgresqlDatabaseInterface):
         return records
     
     def get_epiweek_number_of_latest_epiweeks(self):
-        query = """
+        query = f"""
             SELECT 
                 unnest(
                     ARRAY[
@@ -178,7 +179,7 @@ class DWDatabaseInterface (PostgresqlDatabaseInterface):
                     ] 
                 )
                 AS epiweek_number_5
-            FROM arboviroses.epiweeks
+            FROM {self.default_schema}.epiweeks
             WHERE 
             CURRENT_DATE<=end_date 
             AND CURRENT_DATE>=start_date
