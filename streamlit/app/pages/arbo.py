@@ -21,7 +21,7 @@ DB_PASSWORD              = os.getenv("DB_ARBO_PASSWORD")
 DB_HOST                  = os.getenv("DB_ARBO_HOST")
 DB_PORT                  = os.getenv("DB_ARBO_PORT")
 DB_DATABASE              = os.getenv("DB_ARBO_DATABASE")
-DB_SCHEMA                = '"arboviroses"'
+DB_SCHEMA                = 'arboviroses'
 
 DB_DAGSTER_ARBO_HOST     = os.getenv("DB_DAGSTER_ARBO_HOST")
 DB_DAGSTER_ARBO_PORT     = os.getenv("DB_DAGSTER_ARBO_PORT")
