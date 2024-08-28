@@ -141,7 +141,7 @@ class DownloadMatricesAndCombinedWidget(BaseWidget):
             else:
                 days = file_creation_time//86400
                 hours = (file_creation_time%86400)//3600
-                duration = f"{days}d {hours}h"
+                duration = f"{days:.0f}d {hours:.0f}h"
             
             col_date.markdown(duration)
 
