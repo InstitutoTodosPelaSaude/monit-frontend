@@ -5,47 +5,105 @@ from datetime import datetime
 import os
 import zipfile
 
+from minio import Minio
+from minio.error import S3Error
 
 class FileSystem():
     _instance = None
 
     # [WIP] Make this class a singleton
-    def __init__(self, root_path: str):
-        self.root_path = root_path
+    def __init__(self, root_path: str, secure=False):
+        """
+        Wrapper to interact with the application files stored in MinIO.
 
-    def list_files_in_relative_path(self, relative_path, accepted_extensions=None):
-        absolute_path = Path(self.root_path) / relative_path
-        
+        Args:
+            root_path (str): Root path. /bucketname/path
+        """
+        self.root_path = root_path
+        self.endpoint = "172.30.106.164:9000"#os.getenv("MINIO_ENDPOINT")
+        self.access_key = "WaGjc772vXoOAtgtsafo"#os.getenv("MINIO_ACCESS_KEY")
+        self.secret_key = "JLRzTMEuJCBWVwQnrCMjvl4Ie3Ls9Ba1rrAifnsB"#os.getenv("MINIO_SECRET_KEY")
+        self.secure = secure
+        self.client = None
+
+        self.connect()
+
+
+    def connect(self):
+        """
+        Establishes a connection to the MinIO server using the provided environment variables.
+        """
         try:
-            all_files = absolute_path.iterdir()
-            if accepted_extensions:
-                return [file for file in all_files if file.suffix in accepted_extensions]
-        except Exception as e:
-            print(f'Error listing files in relative path: {e}')
+            # Create a MinIO client
+            self.client = Minio(
+                self.endpoint,
+                access_key=self.access_key,
+                secret_key=self.secret_key,
+                secure=self.secure
+            )
+
+            # Check if the bucket exists or can be accessed
+            bucket_name = self.root_path.split("/")[1]  # Assuming root_path is in form /bucketname/path
+            if not self.client.bucket_exists(bucket_name):
+                raise S3Error(f"Bucket '{bucket_name}' does not exist or is not accessible.")
+
+            print(f"Connected successfully to MinIO bucket: {bucket_name}")
+            self.bucket_name = bucket_name
+        except S3Error as e:
+            self.bucket_name = None
+            print(f"Error connecting to MinIO: {str(e)}")
+
+
+    def list_files_in_relative_path(self, relative_path: str, accepted_extensions=None):
+
+        try:
+            prefix = Path(self.root_path).relative_to(f"/{self.bucket_name}") / relative_path
+
+            # List objects in the specified path (prefix)
+            objects = self.client.list_objects(self.bucket_name, prefix=str(prefix), recursive=True)
+
+            # Filter files by extension if provided
+            file_list = []
+            for obj in objects:
+                if accepted_extensions:
+                    # Check if the object's extension matches the accepted extensions
+                    if any(obj.object_name.endswith(ext) for ext in accepted_extensions):
+                        file_list.append(obj.object_name)
+                else:
+                    file_list.append(obj.object_name)
+
+            return file_list
+        except S3Error as e:
+            print(f"Error listing files in MinIO: {e}")
             return []
-        
-        return all_files
     
 
     def save_content_in_file(self, relative_path, content, file_name):
-        absolute_path = Path(self.root_path) / relative_path
         try:
-            with open(absolute_path / file_name, 'wb') as file:
-                file.write(content)
-            return True
+            object_name = Path(self.root_path).relative_to(f"/{self.bucket_name}") / relative_path / file_name
+            object_name = str(object_name)
+
+            self.client.put_object(
+                self.bucket_name,
+                object_name,
+                io.BytesIO(content),
+                length=len(content)
+            )
+            
+            return object_name
         except Exception as e:
             print(f'Error saving content in file: {e}')
             return False
-        
+
 
     def get_file_content_as_io_bytes(self, relative_path):
-        absolute_path = Path(self.root_path) / relative_path
         try:
-            with open(absolute_path, 'rb') as file:
-                return io.BytesIO(file.read())
+            response = self.client.get_object(self.bucket_name, relative_path)
+            return io.BytesIO(response.read())
         except Exception as e:
             print(f'Error getting file content as io bytes: {e}')
             return None
+
         
 
     def read_all_files_in_folder_as_buffer(self, relative_path, accepted_extensions=None):
