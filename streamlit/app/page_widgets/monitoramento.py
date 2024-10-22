@@ -308,7 +308,7 @@ class ListFilesInTrashFoldersWidget(BaseWidget):
             self.container.success('Arquivos restaurados com sucesso!')
 
             for folder, file in self.selected_files:
-                self.file_system.move_file_to_folder(folder + '/_out', file, folder)
+                self.file_system.move_file_to_folder(folder + '/_out/', file, f"{folder}/")
 
         if delete_button and type_to_delete == 'DELETAR':
             self.container.error('Arquivos deletados com sucesso!')
