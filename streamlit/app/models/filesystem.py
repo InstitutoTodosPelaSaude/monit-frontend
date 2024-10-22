@@ -82,7 +82,10 @@ class FileSystem():
 
     def save_content_in_file(self, relative_path, content, file_name):
         try:
-            object_name = self.root_path / relative_path / file_name
+            if not relative_path.endswith("/"):
+                relative_path += "/"
+                
+            object_name = self.root_path + relative_path + file_name
             object_name = str(object_name)
 
             self.client.put_object(
