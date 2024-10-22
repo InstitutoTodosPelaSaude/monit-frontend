@@ -79,7 +79,6 @@ class FileSystem():
         except S3Error as e:
             print(f"Error listing files in MinIO: {e}")
             
-    
 
     def save_content_in_file(self, relative_path, content, file_name):
         try:
@@ -108,7 +107,6 @@ class FileSystem():
             print(f'Error getting file content as io bytes: {e}')
             return None
 
-        
 
     def read_all_files_in_folder_as_buffer(self, relative_path, accepted_extensions=None):
         files = self.list_files_in_relative_path(relative_path, accepted_extensions)
@@ -152,8 +150,8 @@ class FileSystem():
 
     def move_file_to_folder(self, relative_path, file_name, target_folder):
         try:
-            object_name = self.root_path / relative_path / file_name
-            target_object_name = self.root_path / target_folder / file_name
+            object_name = self.root_path + relative_path + file_name
+            target_object_name = self.root_path + target_folder + file_name
 
             object_name = str(object_name)
             target_object_name = str(target_object_name)
@@ -165,14 +163,12 @@ class FileSystem():
 
             # Remove the original file
             self.client.remove_object(self.bucket_name, object_name)
-
             return True
-        except Exception as e:
+        except S3Error as e:
             print(f'Error moving file to folder: {e}')
             return False
 
-
-         
+   
     def delete_file(self, relative_path):
         absolute_path = Path(self.root_path) / relative_path
 

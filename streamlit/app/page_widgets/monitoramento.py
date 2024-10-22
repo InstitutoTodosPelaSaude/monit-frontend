@@ -226,8 +226,7 @@ class ListFilesInLabFoldersWidget(BaseWidget):
         expander_container = self.container.expander(f":file_folder: **{lab}**")
 
         for filename in files:
-            # [WIP] PATH COMPLETO POR ENQUANTO
-            # filename = str(filename).split('/')[-1]
+            filename = str(filename).split('/')[-1]
 
             col_filename, col_trash = expander_container.columns([.9, .1])
             
@@ -237,7 +236,7 @@ class ListFilesInLabFoldersWidget(BaseWidget):
             delete_file = col_trash.button(f':wastebasket:', key=f'delete_{lab}_{filename}', help='Deletar arquivo')
 
             if delete_file:
-                if self.file_system.move_file_to_folder(lab, filename, f'{lab}/_out'):
+                if self.file_system.move_file_to_folder(f"{lab}/", filename, f'{lab}/_out/'):
                     self.container.success(f'Arquivo {filename} movido para a lixeira!')
                 else:
                     self.container.error(f'Erro ao mover arquivo {filename} para a lixeira!')
