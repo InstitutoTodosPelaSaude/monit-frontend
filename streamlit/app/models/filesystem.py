@@ -16,14 +16,21 @@ class FileSystem():
     def __init__(self, root_path: str, secure=False):
         """
         Wrapper to interact with the application files stored in MinIO.
+        HOW THE VARIABLE ROOT_PATH WORKS?
+            It must be a string in the following format: /bucketname/my/root/path
+            The first part of the string is the BUCKET NAME in MinIO
+            The rest is the base path, from which all the interactions will be made relative.
+            
+            For example, if you want to delete the object stored in the bucket LOCUS with path /my/loved/loveLetter.txt 
+            You CAN instantiate the filesystem = FileSystem(root_path='/locus/my/') and call filesystem.delete_file('/loved/loveLetter.txt').
 
         Args:
             root_path (str): Root path. /bucketname/path
         """
-        self.root_path = root_path
-        self.endpoint = "172.30.106.164:9000"#os.getenv("MINIO_ENDPOINT")
-        self.access_key = "WaGjc772vXoOAtgtsafo"#os.getenv("MINIO_ACCESS_KEY")
-        self.secret_key = "JLRzTMEuJCBWVwQnrCMjvl4Ie3Ls9Ba1rrAifnsB"#os.getenv("MINIO_SECRET_KEY")
+        self.root_path  = root_path
+        self.endpoint   = os.getenv("MINIO_ENDPOINT")
+        self.access_key = os.getenv("MINIO_ACCESS_KEY")
+        self.secret_key = os.getenv("MINIO_SECRET_KEY")
         self.secure = secure
         self.client = None
 
@@ -153,19 +160,18 @@ class FileSystem():
 
     def move_file_to_folder(self, relative_path, file_name, target_folder):
         try:
-            object_name = self.root_path + relative_path + file_name
-            target_object_name = self.root_path + target_folder + file_name
+            original_file_absolute_path  = self.root_path + relative_path + file_name
+            target_file_path             = self.root_path + target_folder + file_name
 
-            object_name = str(object_name)
-            target_object_name = str(target_object_name)
             self.client.copy_object(
                 self.bucket_name, 
-                target_object_name, 
-                CopySource( self.bucket_name, object_name )
+                target_file_path, 
+                CopySource( self.bucket_name, original_file_absolute_path )
             )
 
             # Remove the original file
-            self.client.remove_object(self.bucket_name, object_name)
+            self.client.remove_object(self.bucket_name, original_file_absolute_path)
+
             return True
         except S3Error as e:
             print(f'Error moving file to folder: {e}')
@@ -173,12 +179,12 @@ class FileSystem():
 
    
     def delete_file(self, relative_path):
-        absolute_path = Path(self.root_path) / relative_path
+        absolute_object_path = self.root_path + relative_path
 
         try:
-            os.remove(absolute_path)
+            self.client.remove_object(self.bucket_name, absolute_object_path)
             return True
-        except Exception as e:
+        except S3Error as e:
             print(f'Error deleting file: {e}')
             return False
         
