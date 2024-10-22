@@ -7,6 +7,7 @@ import zipfile
 
 from minio import Minio
 from minio.error import S3Error
+from minio.commonconfig import REPLACE, CopySource
 
 class FileSystem():
     _instance = None
@@ -49,18 +50,20 @@ class FileSystem():
 
             print(f"Connected successfully to MinIO bucket: {bucket_name}")
             self.bucket_name = bucket_name
+            self.root_path = "/".join( self.root_path.split("/")[2:] )
         except S3Error as e:
             self.bucket_name = None
             print(f"Error connecting to MinIO: {str(e)}")
 
 
     def list_files_in_relative_path(self, relative_path: str, accepted_extensions=None):
-
+    
         try:
-            prefix = Path(self.root_path).relative_to(f"/{self.bucket_name}") / relative_path
+            prefix = self.root_path+relative_path
+            print(prefix)
 
             # List objects in the specified path (prefix)
-            objects = self.client.list_objects(self.bucket_name, prefix=str(prefix), recursive=True)
+            objects = self.client.list_objects(self.bucket_name, prefix=str(prefix), recursive=False)
 
             # Filter files by extension if provided
             file_list = []
@@ -75,12 +78,12 @@ class FileSystem():
             return file_list
         except S3Error as e:
             print(f"Error listing files in MinIO: {e}")
-            return []
+            
     
 
     def save_content_in_file(self, relative_path, content, file_name):
         try:
-            object_name = Path(self.root_path).relative_to(f"/{self.bucket_name}") / relative_path / file_name
+            object_name = self.root_path / relative_path / file_name
             object_name = str(object_name)
 
             self.client.put_object(
@@ -90,7 +93,7 @@ class FileSystem():
                 length=len(content)
             )
             
-            return object_name
+            return True
         except Exception as e:
             print(f'Error saving content in file: {e}')
             return False
@@ -98,7 +101,8 @@ class FileSystem():
 
     def get_file_content_as_io_bytes(self, relative_path):
         try:
-            response = self.client.get_object(self.bucket_name, relative_path)
+            object_path = self.root_path / relative_path
+            response = self.client.get_object(self.bucket_name, object_path)
             return io.BytesIO(response.read())
         except Exception as e:
             print(f'Error getting file content as io bytes: {e}')
@@ -147,15 +151,26 @@ class FileSystem():
     
 
     def move_file_to_folder(self, relative_path, file_name, target_folder):
-        absolute_path = Path(self.root_path) / relative_path
-        target_path = Path(self.root_path) / target_folder
-
         try:
-            os.rename(absolute_path / file_name, target_path / file_name)
+            object_name = self.root_path / relative_path / file_name
+            target_object_name = self.root_path / target_folder / file_name
+
+            object_name = str(object_name)
+            target_object_name = str(target_object_name)
+            self.client.copy_object(
+                self.bucket_name, 
+                target_object_name, 
+                CopySource( self.bucket_name, object_name )
+            )
+
+            # Remove the original file
+            self.client.remove_object(self.bucket_name, object_name)
+
             return True
         except Exception as e:
             print(f'Error moving file to folder: {e}')
             return False
+
 
          
     def delete_file(self, relative_path):

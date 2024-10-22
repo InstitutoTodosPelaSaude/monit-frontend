@@ -35,56 +35,56 @@ LABS = ['dbmol', 'einstein', 'fleury', 'hilab', 'hlagyn', 'sabin', 'target']
 
 st.title("Central Respat")
 
-upload_files_wdg = UploadFilesWidget(
-    st, 
-    key='upload_files_arbo', 
-    base_path=ROOT_PATH, 
-    labs=LABS
-)
-
-download_matrices_wdg = DownloadMatricesAndCombinedWidget(
-    st, 
-    key='download_matrices_arbo', 
-    base_path=ROOT_PATH, 
-    labs=LABS
-)
-
+# upload_files_wdg = UploadFilesWidget(
+#     st, 
+#     key='upload_files_arbo', 
+#     base_path=ROOT_PATH, 
+#     labs=LABS
+# )
+# 
+# download_matrices_wdg = DownloadMatricesAndCombinedWidget(
+#     st, 
+#     key='download_matrices_arbo', 
+#     base_path=ROOT_PATH, 
+#     labs=LABS
+# )
+# 
 list_files_in_lab_folders = ListFilesInLabFoldersWidget(st, base_path=ROOT_PATH, labs=LABS)
 
 list_files_in_trash_folders = ListFilesInTrashFoldersWidget(st, base_path=ROOT_PATH, labs=LABS)
 
-last_run_of_each_lab = LastRunOfEachLabInfoWidget(
-    st, 
-    base_path=ROOT_PATH, 
-    labs=LABS,
-    dw_database_connection_kwargs={
-        'user': DB_USER,
-        'password': DB_PASSWORD,
-        'host': DB_HOST,
-        'port': DB_PORT,
-        'database': DB_DATABASE,
-        'default_schema': DB_SCHEMA
-    },
-    dagster_database_connection_kwargs={
-        'user': DB_DAGSTER_RESPAT_USER,
-        'password': DB_DAGSTER_RESPAT_PASSWORD,
-        'host': DB_DAGSTER_RESPAT_HOST,
-        'port': DB_DAGSTER_RESPAT_PORT,
-        'database': DB_DAGSTER_RESPAT_DATABASE
-    }
-)
+# last_run_of_each_lab = LastRunOfEachLabInfoWidget(
+#     st, 
+#     base_path=ROOT_PATH, 
+#     labs=LABS,
+#     dw_database_connection_kwargs={
+#         'user': DB_USER,
+#         'password': DB_PASSWORD,
+#         'host': DB_HOST,
+#         'port': DB_PORT,
+#         'database': DB_DATABASE,
+#         'default_schema': DB_SCHEMA
+#     },
+#     dagster_database_connection_kwargs={
+#         'user': DB_DAGSTER_RESPAT_USER,
+#         'password': DB_DAGSTER_RESPAT_PASSWORD,
+#         'host': DB_DAGSTER_RESPAT_HOST,
+#         'port': DB_DAGSTER_RESPAT_PORT,
+#         'database': DB_DAGSTER_RESPAT_DATABASE
+#     }
+# )
 
-labs_dagster_link = DagsterLinkWidget(st, dagster_link=DASGSTER_LINK)
+# labs_dagster_link = DagsterLinkWidget(st, dagster_link=DASGSTER_LINK)
 
-link_to_home = LinkToHomeWidget(st)
+# link_to_home = LinkToHomeWidget(st)
 
-footer = ITPSFooterWidget(st, ROOT_PATH[:-5])
+# footer = ITPSFooterWidget(st, ROOT_PATH[:-5])
 
-upload_files_wdg.render()
-download_matrices_wdg.render()
+# upload_files_wdg.render()
+# download_matrices_wdg.render()
 list_files_in_lab_folders.render()
 list_files_in_trash_folders.render()
-last_run_of_each_lab.render()
-labs_dagster_link.render()
-link_to_home.render()
-footer.render()
+# # last_run_of_each_lab.render()
+# labs_dagster_link.render()
+# link_to_home.render()
+# footer.render()

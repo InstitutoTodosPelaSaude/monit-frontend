@@ -226,14 +226,15 @@ class ListFilesInLabFoldersWidget(BaseWidget):
         expander_container = self.container.expander(f":file_folder: **{lab}**")
 
         for filename in files:
-            filename = str(filename).split('/')[-1]
+            # [WIP] PATH COMPLETO POR ENQUANTO
+            # filename = str(filename).split('/')[-1]
 
             col_filename, col_trash = expander_container.columns([.9, .1])
             
             col_filename.markdown(f':page_facing_up: {filename}')
             
             # [WIP] Implement delete file -> MOVE FILE TO _out folder (trash)
-            delete_file = col_trash.button(f':wastebasket:', key=f'delete_{filename}', help='Deletar arquivo')
+            delete_file = col_trash.button(f':wastebasket:', key=f'delete_{lab}_{filename}', help='Deletar arquivo')
 
             if delete_file:
                 if self.file_system.move_file_to_folder(lab, filename, f'{lab}/_out'):
