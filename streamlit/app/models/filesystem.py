@@ -121,7 +121,7 @@ class FileSystem():
 
         try:
             # Get the object as a stream
-            response = self.client.get_object(self.bucket_name, relative_path)
+            response = self.client.get_object(self.bucket_name, self.root_path +relative_path)
             
             # Read the object content as binary data
             binary_data = response.read()
@@ -139,22 +139,43 @@ class FileSystem():
             response.close()
             response.release_conn()
 
+    def get_file_last_modified_date(self, relative_path):
+
+        try:
+            file_stats = self.client.stat_object(self.bucket_name, self.root_path+relative_path)
+            last_modified_timestamp = file_stats.last_modified
+
+            # Remove Time zone info to make it a 'Offset-Naive' timestamp, just like datetime.now()
+            last_modified_timestamp = last_modified_timestamp.replace(tzinfo=None)
+
+            return last_modified_timestamp
+        
+        except S3Error as e:
+            return datetime.now()
+
+        return datetime.now()
+
     def read_all_files_in_folder_as_buffer(self, relative_path, accepted_extensions=None):
         files = self.list_files_in_relative_path(relative_path, accepted_extensions)
         files.sort()
 
         dt_now               = datetime.now()
-        dt_last_modification = lambda file:datetime.now()#datetime.fromtimestamp(os.path.getmtime(file))
+        dt_last_modification = lambda file:self.get_file_last_modified_date(file)
 
         try:
-            file_contents = [
-                (
+
+            # file.replace(self.root_path, '', 1) removes the root path from the 'file' path
+            # because the methods get_file_content_as_binary and get_file_creation_date
+            # works only with relative paths
+            
+            file_contents = []
+            for file in files:
+                file = file.replace(self.root_path, '', 1)
+                file_contents.append((
                     file, 
-                    self.get_file_content_as_binary(file), #open(file, 'rb').read(),
+                    self.get_file_content_as_binary(file),
                     (dt_now - dt_last_modification(file)).total_seconds() # Time in seconds since last modification
-                )
-                for file in files
-            ]
+                ))
 
         except Exception as e:
             file_contents = [
