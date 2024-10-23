@@ -49,7 +49,7 @@ download_matrices_wdg = DownloadMatricesAndCombinedWidget(
     labs=LABS
 )
 
-list_files_in_lab_folders   = ListFilesInLabFoldersWidget(st, base_path=ROOT_PATH, labs=LABS)
+list_files_in_lab_folders   = ListFilesInLabFoldersWidget  (st, base_path=ROOT_PATH, labs=LABS)
 list_files_in_trash_folders = ListFilesInTrashFoldersWidget(st, base_path=ROOT_PATH, labs=LABS)
 
 # last_run_of_each_lab = LastRunOfEachLabInfoWidget(

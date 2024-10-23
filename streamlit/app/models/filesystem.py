@@ -153,7 +153,6 @@ class FileSystem():
         except S3Error as e:
             return datetime.now()
 
-        return datetime.now()
 
     def read_all_files_in_folder_as_buffer(self, relative_path, accepted_extensions=None):
         files = self.list_files_in_relative_path(relative_path, accepted_extensions)
