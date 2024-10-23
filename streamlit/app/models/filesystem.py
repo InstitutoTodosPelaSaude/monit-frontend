@@ -110,26 +110,47 @@ class FileSystem():
 
     def get_file_content_as_io_bytes(self, relative_path):
         try:
-            object_path = self.root_path / relative_path
+            object_path = self.root_path + relative_path
             response = self.client.get_object(self.bucket_name, object_path)
             return io.BytesIO(response.read())
         except Exception as e:
             print(f'Error getting file content as io bytes: {e}')
             return None
 
+    def get_file_content_as_binary(self, relative_path):
+
+        try:
+            # Get the object as a stream
+            response = self.client.get_object(self.bucket_name, relative_path)
+            
+            # Read the object content as binary data
+            binary_data = response.read()
+            
+            response.close()
+            response.release_conn()
+
+            return binary_data
+        
+        except S3Error as e:
+            print(f"Error occurred while fetching the file: {e}")
+            return f'Error reading file: {e}'.encode('utf-8')
+        
+        finally:
+            response.close()
+            response.release_conn()
 
     def read_all_files_in_folder_as_buffer(self, relative_path, accepted_extensions=None):
         files = self.list_files_in_relative_path(relative_path, accepted_extensions)
         files.sort()
 
-        dt_now = datetime.now()
-        dt_last_modification = lambda file:datetime.fromtimestamp(os.path.getmtime(file))
+        dt_now               = datetime.now()
+        dt_last_modification = lambda file:datetime.now()#datetime.fromtimestamp(os.path.getmtime(file))
 
         try:
             file_contents = [
                 (
                     file, 
-                    open(file, 'rb').read(),
+                    self.get_file_content_as_binary(file), #open(file, 'rb').read(),
                     (dt_now - dt_last_modification(file)).total_seconds() # Time in seconds since last modification
                 )
                 for file in files
@@ -137,7 +158,7 @@ class FileSystem():
 
         except Exception as e:
             file_contents = [
-                ('UNABLE TO READ FILE', f'Error reading file: {e}'.encode('utf-8'), 0)
+                (f'UNABLE TO READ FILE {e}', f'Error reading file: {e}'.encode('utf-8'), 0)
                 for file in files
             ]
 

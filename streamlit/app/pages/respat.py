@@ -35,22 +35,21 @@ LABS = ['dbmol', 'einstein', 'fleury', 'hilab', 'hlagyn', 'sabin', 'target']
 
 st.title("Central Respat")
 
-# upload_files_wdg = UploadFilesWidget(
-#     st, 
-#     key='upload_files_arbo', 
-#     base_path=ROOT_PATH, 
-#     labs=LABS
-# )
-# 
-# download_matrices_wdg = DownloadMatricesAndCombinedWidget(
-#     st, 
-#     key='download_matrices_arbo', 
-#     base_path=ROOT_PATH, 
-#     labs=LABS
-# )
-# 
-list_files_in_lab_folders = ListFilesInLabFoldersWidget(st, base_path=ROOT_PATH, labs=LABS)
+upload_files_wdg = UploadFilesWidget(
+    st, 
+    key='upload_files_arbo', 
+    base_path=ROOT_PATH, 
+    labs=LABS
+)
 
+download_matrices_wdg = DownloadMatricesAndCombinedWidget(
+    st, 
+    key='download_matrices_arbo', 
+    base_path=ROOT_PATH, 
+    labs=LABS
+)
+
+list_files_in_lab_folders   = ListFilesInLabFoldersWidget(st, base_path=ROOT_PATH, labs=LABS)
 list_files_in_trash_folders = ListFilesInTrashFoldersWidget(st, base_path=ROOT_PATH, labs=LABS)
 
 # last_run_of_each_lab = LastRunOfEachLabInfoWidget(
@@ -74,14 +73,14 @@ list_files_in_trash_folders = ListFilesInTrashFoldersWidget(st, base_path=ROOT_P
 #     }
 # )
 
-# labs_dagster_link = DagsterLinkWidget(st, dagster_link=DASGSTER_LINK)
+labs_dagster_link = DagsterLinkWidget(st, dagster_link=DASGSTER_LINK)
 
-# link_to_home = LinkToHomeWidget(st)
+link_to_home = LinkToHomeWidget(st)
 
-# footer = ITPSFooterWidget(st, ROOT_PATH[:-5])
+footer = ITPSFooterWidget(st, ROOT_PATH[:-5])
 
-# upload_files_wdg.render()
-# download_matrices_wdg.render()
+upload_files_wdg.render()
+download_matrices_wdg.render()
 list_files_in_lab_folders.render()
 list_files_in_trash_folders.render()
 # # last_run_of_each_lab.render()
