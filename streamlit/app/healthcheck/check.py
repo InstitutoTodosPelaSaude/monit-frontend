@@ -31,7 +31,6 @@ def check_minio():
     except S3Error as err:
         return False, f"MinIO connection failed: {err}"
 
-
 def check_database_variables():
 
     # Define the database variable names for each database

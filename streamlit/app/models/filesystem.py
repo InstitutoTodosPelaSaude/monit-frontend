@@ -117,6 +117,7 @@ class FileSystem():
             print(f'Error getting file content as io bytes: {e}')
             return None
 
+
     def get_file_content_as_binary(self, relative_path):
 
         try:
@@ -138,6 +139,7 @@ class FileSystem():
         finally:
             response.close()
             response.release_conn()
+
 
     def get_file_last_modified_date(self, relative_path):
 
