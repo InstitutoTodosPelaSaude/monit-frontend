@@ -31,7 +31,7 @@ DB_DAGSTER_RESPAT_DATABASE = os.getenv("DB_DAGSTER_RESPAT_DATABASE")
 
 DASGSTER_LINK              = os.getenv("RESPAT_DAGSTER_LINK")
 
-LABS = ['dbmol', 'einstein', 'fleury', 'hilab', 'hlagyn', 'sabin', 'target']
+LABS = ['dbmol', 'einstein', 'fleury', 'hilab', 'hlagyn', 'sabin', 'target', 'hpardini']
 
 st.title("Central Respat")
 
