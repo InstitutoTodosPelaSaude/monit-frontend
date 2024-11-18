@@ -233,10 +233,10 @@ class ListFilesInLabFoldersWidget(BaseWidget):
             col_filename.markdown(f':page_facing_up: {filename}')
             
             # [WIP] Implement delete file -> MOVE FILE TO _out folder (trash)
-            delete_file = col_trash.button(f':wastebasket:', key=f'delete_{filename}', help='Deletar arquivo')
+            delete_file = col_trash.button(f':wastebasket:', key=f'delete_{lab}_{filename}', help='Deletar arquivo')
 
             if delete_file:
-                if self.file_system.move_file_to_folder(lab, filename, f'{lab}/_out'):
+                if self.file_system.move_file_to_folder(f"{lab}/", filename, f'{lab}/_out/'):
                     self.container.success(f'Arquivo {filename} movido para a lixeira!')
                 else:
                     self.container.error(f'Erro ao mover arquivo {filename} para a lixeira!')
@@ -308,7 +308,7 @@ class ListFilesInTrashFoldersWidget(BaseWidget):
             self.container.success('Arquivos restaurados com sucesso!')
 
             for folder, file in self.selected_files:
-                self.file_system.move_file_to_folder(folder + '/_out', file, folder)
+                self.file_system.move_file_to_folder(folder + '/_out/', file, f"{folder}/")
 
         if delete_button and type_to_delete == 'DELETAR':
             self.container.error('Arquivos deletados com sucesso!')

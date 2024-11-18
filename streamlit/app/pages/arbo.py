@@ -31,7 +31,7 @@ DB_DAGSTER_ARBO_DATABASE = os.getenv("DB_DAGSTER_ARBO_DATABASE")
 
 DASGSTER_LINK            = os.getenv("ARBO_DAGSTER_LINK")
 
-LABS = ['dbmol', 'einstein', 'fleury', 'hilab', 'hlagyn', 'sabin', 'target']
+LABS = ['dbmol', 'einstein', 'fleury', 'hilab', 'hlagyn', 'sabin', 'target', 'hpardini']
 
 st.title("Central Arbo")
 

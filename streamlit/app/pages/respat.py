@@ -31,7 +31,7 @@ DB_DAGSTER_RESPAT_DATABASE = os.getenv("DB_DAGSTER_RESPAT_DATABASE")
 
 DASGSTER_LINK              = os.getenv("RESPAT_DAGSTER_LINK")
 
-LABS = ['dbmol', 'einstein', 'fleury', 'hilab', 'hlagyn', 'sabin', 'target']
+LABS = ['dbmol', 'einstein', 'fleury', 'hilab', 'hlagyn', 'sabin', 'target', 'hpardini']
 
 st.title("Central Respat")
 
@@ -49,8 +49,7 @@ download_matrices_wdg = DownloadMatricesAndCombinedWidget(
     labs=LABS
 )
 
-list_files_in_lab_folders = ListFilesInLabFoldersWidget(st, base_path=ROOT_PATH, labs=LABS)
-
+list_files_in_lab_folders   = ListFilesInLabFoldersWidget  (st, base_path=ROOT_PATH, labs=LABS)
 list_files_in_trash_folders = ListFilesInTrashFoldersWidget(st, base_path=ROOT_PATH, labs=LABS)
 
 last_run_of_each_lab = LastRunOfEachLabInfoWidget(

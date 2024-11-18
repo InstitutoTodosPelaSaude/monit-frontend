@@ -3,3 +3,4 @@ pandas
 streamlit
 matplotlib
 psycopg2
+minio==7.2.9
