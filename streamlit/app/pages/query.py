@@ -12,7 +12,6 @@ COMMON_FIELDS = """
     lab_id str lab name. One of: DBMOL, EINSTEIN, FLEURY, HILAB, HLAGYN, SABIN, TARGET, HPARDINI, DASA
     sample_id str	Unique identifier for the biological sample used in the test.
     test_id	str	Unique identifier for the test performed.
-    test_kit str	Name or code of the test kit used for diagnosis. One of: arbo_pcr_3, chikv_pcr, denv_antigen, denv_pcr, denv_serum, igg_serum, igm_serum, mayv_pcr, ns1_antigen, orov_pcr, yfv_pcr, zikv_pcr
     sex	str	One of: F, M or NULL
     age	int	Age in years
     date_testing	str	Date the test was conducted, in the format YYYY-MM-DD.
@@ -42,6 +41,7 @@ ARBO_FIELDS = f"""
     The table `ARBOVIROSES_TABLE` combined contains information about test results for arbovirus.
     Data dictionary:
     {COMMON_FIELDS}
+    test_kit str	Name or code of the test kit used for diagnosis. One of: arbo_pcr_3, chikv_pcr, denv_antigen, denv_pcr, denv_serum, igg_serum, igm_serum, mayv_pcr, ns1_antigen, orov_pcr, yfv_pcr, zikv_pcr
     DENV_test_result	str	Dengue  result: Pos (Positive), Neg (Negative), or NT (Not Tested).
     ZIKV_test_result	str	Zika result
     CHIKV_test_result	str	Chikungunya result
@@ -55,7 +55,7 @@ RESPAT_FIELDS = F"""
     The table `RESPAT_TABLE` contains information about test results for respiratory pathogens.
     Data dictionary:
     {COMMON_FIELDS}
-    SC2_test_result str SARS-CoV-2 result: Pos (Positive), Neg (Negative), or NT (Not Tested).
+    test_kit str	Name or code of the test kit used for diagnosis. One of: adeno_iga,adeno_igg,adeno_igm,adeno_pcr,bac_antigen,bac_igg,bac_igm,bac_pcr,covid_antibodies,covid_antigen,covid_iga,covid_pcr,flua_igg,flua_igm,flu_antigen,flub_igg,flub_igm,flu_pcr,sc2_igg,test_14,test_21,test_23,test_24,test_3,test_4,thermo,vsr_antigen,vsr_igg,    SC2_test_result str SARS-CoV-2 result: Pos (Positive), Neg (Negative), or NT (Not Tested).
     FLUA_test_result    str Influenza A result
     FLUB_test_result    str Influenza B result
     VSR_test_result str VSR result
