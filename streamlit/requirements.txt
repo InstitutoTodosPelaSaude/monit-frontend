@@ -4,3 +4,5 @@ streamlit
 matplotlib
 psycopg2
 minio==7.2.9
+openai
+sqlparse==0.5.3
