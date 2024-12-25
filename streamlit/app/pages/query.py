@@ -5,6 +5,8 @@ import os
 import json
 from openai import OpenAI
 
+import duckdb
+
 import streamlit as st
 
 COMMON_FIELDS = """
@@ -70,7 +72,142 @@ RESPAT_FIELDS = F"""
 """
 
 
+@st.cache_resource()
+def get_connection():
+    MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT")
+    MINIO_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY")
+    MINIO_SECRET_KEY = os.getenv("MINIO_SECRET_KEY")
+    
+    conn = duckdb.connect(database=':memory:', read_only=False)
+    conn.execute(f"""
+        INSTALL httpfs;
+        LOAD httpfs;
+        SET s3_region='us-east-1'; -- This is ignore by MinIO
+        SET s3_url_style='path';
+        SET s3_endpoint='{MINIO_ENDPOINT}';
+        SET s3_access_key_id='{MINIO_ACCESS_KEY}';
+        SET s3_secret_access_key='{MINIO_SECRET_KEY}';
+        SET s3_use_ssl = false;
+    """)
+    return conn
+
+def query_database(sql_query):
+
+    conn = get_connection()
+    # RESPAT_TABLE -> data/arbo/data/combined/combined.tsv 
+    # ARBOVIROSES_TABLE -> data/respat/data/combined/combined.tsv
+
+    sql_query = sql_query.replace(
+        "ARBOVIROSES_TABLE", 
+        """
+        read_csv(
+            's3://data/arbo/data/combined/combined.tsv',   
+            delim='\\t',
+            columns = {
+                "lab_id": "VARCHAR",
+                "sample_id": "VARCHAR",
+                "test_id": "VARCHAR",
+                "test_kit": "VARCHAR",
+                "sex": "VARCHAR",
+                "age": "INTEGER",
+                "date_testing": "DATE",
+                "patient_id": "VARCHAR",
+                "file_name": "VARCHAR",
+                "DENV_test_result": "VARCHAR",
+                "ZIKV_test_result": "VARCHAR",
+                "CHIKV_test_result": "VARCHAR",
+                "YFV_test_result": "VARCHAR",
+                "MAYV_test_result": "VARCHAR",
+                "OROV_test_result": "VARCHAR",
+                "WNV_test_result": "VARCHAR",
+                "qty_original_lines": "VARCHAR",
+                "created_at": "TIMESTAMP",
+                "updated_at": "TIMESTAMP",
+                "age_group": "VARCHAR",
+                "epiweek_enddate": "DATE",
+                "epiweek_number": "VARCHAR",
+                "month": "VARCHAR",
+                "location": "VARCHAR",
+                "state": "VARCHAR",
+                "country": "VARCHAR",
+                "region": "VARCHAR",
+                "macroregion": "VARCHAR",
+                "macroregion_code": "VARCHAR",
+                "state_code": "VARCHAR",
+                "state_ibge_code": "VARCHAR",
+                "location_ibge_code": "VARCHAR",
+                "lat": "VARCHAR",
+                "long": "VARCHAR"
+            }
+        )
+        """
+    )
+    
+    sql_query = sql_query.replace(
+        "RESPAT_TABLE",
+        """
+        read_csv(
+            's3://data/respat/data/combined/combined.tsv', 
+            delim='\\t',
+            columns = {
+                "lab_id": "VARCHAR",
+                "sample_id": "VARCHAR",
+                "test_id": "VARCHAR",
+                "test_kit": "VARCHAR",
+                "sex": "VARCHAR",
+                "age": "INTEGER",
+                "date_testing": "DATE",
+                "patient_id": "VARCHAR",
+                "file_name": "VARCHAR",
+                "FLUA_test_result": "VARCHAR",
+                "FLUB_test_result": "VARCHAR",
+                "VSR_test_result": "VARCHAR",
+                "RINO_test_result": "VARCHAR",
+                "META_test_result": "VARCHAR",
+                "PARA_test_result": "VARCHAR",
+                "ADENO_test_result": "VARCHAR",
+                "BOCA_test_result": "VARCHAR",
+                "COVS_test_result": "VARCHAR",
+                "ENTERO_test_result": "VARCHAR",
+                "BAC_test_result": "VARCHAR",
+                "qty_original_lines": "VARCHAR",
+                "created_at": "TIMESTAMP",
+                "updated_at": "TIMESTAMP",
+                "age_group": "VARCHAR",
+                "epiweek_enddate": "DATE",
+                "epiweek_number": "VARCHAR",
+                "month": "VARCHAR",
+                "location": "VARCHAR",
+                "state": "VARCHAR",
+                "country": "VARCHAR",
+                "region": "VARCHAR",
+                "macroregion": "VARCHAR",
+                "macroregion_code": "VARCHAR",
+                "state_code": "VARCHAR",
+                "state_ibge_code": "VARCHAR",
+                "location_ibge_code": "VARCHAR",
+                "lat": "VARCHAR",
+                "long": "VARCHAR"
+            }
+        ) 
+        """
+    )
+
+    df = conn.execute(sql_query).fetchdf()
+
+    return df
+
 def fetch_sql_query(question, data_dictonary):
+    """
+    Fetches a SQL query from OpenAI based on a question and a data dictionary.
+
+    Args:
+        question (str): The question to ask OpenAI.
+        data_dictonary (str): A text containing the data dictionary to provide to OpenAI. It can be about arboviruses or respiratory pathogens.
+
+    Raises:
+        RuntimeError: If an error occurs while fetching the SQL query from OpenAI.
+    """    
 
     PROMPT = f"""
         {data_dictonary}
@@ -119,20 +256,36 @@ def widget_query( container ):
     sql_query = None
     data_dictonary = ARBO_FIELDS if project == "Arboviroses" else RESPAT_FIELDS
 
-    if col_button_go.button("Go!"):
-        if not question.strip():
-            col_question.warning("Please enter a valid question.")
-        else:
-            try:
-                sql_query = fetch_sql_query(question, data_dictonary)
-            except Exception as e:
-                col_button_go.error(f"An error occurred: {e}")
+    if not col_button_go.button("Go!"):
+        return
 
-    if sql_query:
-        sql_query_formatted = sqlparse.format(sql_query, reindent=True, keyword_case='upper')
+    if not question.strip():
+        col_question.warning("Please enter a valid question.")
 
-        toggle_code = container.expander("Query", False)        
-        toggle_code.code(sql_query_formatted, language="sql")
+    try:
+        sql_query = fetch_sql_query(question, data_dictonary)
+    except Exception as e:
+        container.error(f"An error occurred: {e}")
+        return
+
+    if not sql_query:
+        return
+
+    try:
+        data = query_database(sql_query)
+    except Exception as e:
+        container.error(f"An error occurred: {e}")
+        return
+
+    container.divider()
+    container.markdown("### Results")
+    container.dataframe(data)
+
+    sql_query_formatted = sqlparse.format(sql_query, reindent=True, keyword_case='upper')
+
+    toggle_code = container.expander("Query", False)        
+    toggle_code.code(sql_query_formatted, language="sql")
+
 
 if __name__ == "__main__":
     # Streamlit UI
