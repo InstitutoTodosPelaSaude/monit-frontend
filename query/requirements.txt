@@ -1,0 +1,6 @@
+pandas
+minio==7.2.9
+openai
+sqlparse==0.5.3
+duckdb
+fastapi[standard]
