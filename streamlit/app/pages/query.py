@@ -48,20 +48,16 @@ def fetch_sql_query(question, project):
         response.raise_for_status()
         
         response_data = response.json()
-        return response_data.get("sql", "No query found")
+        return response_data.get("sql", "No query found"), response_data.get("raw_sql", "No query found")
     except requests.exceptions.RequestException as e:
         return None
 
 def widget_query( container ):
 
     # Project selection
-    col_text, col_project_selection, _ = container.columns( [ 2.5, 3, 4.5 ] )
-    col_text.text("Ask me anything about ")
-    project = col_project_selection.selectbox(
-        "Project", 
-        ["ARBO", "RESPAT"], 
-        label_visibility = 'collapsed'
-    )
+    project, table = widget_select_project_table(st.sidebar)
+
+    container.markdown(f"Ask me anything about table **{table}** of **{project}**")
 
     # Question input
     col_question, col_button_go = container.columns( [ 4, 1 ] )
@@ -77,7 +73,7 @@ def widget_query( container ):
         col_question.warning("Please enter a valid question.")
 
     try:
-        sql_query = fetch_sql_query(question, project)
+        sql_query, sql_raw_query = fetch_sql_query(question, project)
     except Exception as e:
         container.error(f"An error occurred: {e}")
         return
@@ -95,26 +91,38 @@ def widget_query( container ):
     container.markdown("### Results")
     container.dataframe(data)
 
-    sql_query_formatted = sqlparse.format(sql_query, reindent=True, keyword_case='upper')
+    sql_query_formatted = sqlparse.format(sql_raw_query, reindent=True, keyword_case='upper')
 
     toggle_code = container.expander("Query", False)        
     toggle_code.code(sql_query_formatted, language="sql")
 
+def widget_select_project_table(container):
+    
+    project_tables = {
+        "ARBO":["COMBINED"],
+        "RESPAT":["COMBINED"]
+    }
+
+    container.title("Tables")
+
+    project = container.selectbox(
+        "Project", 
+        ["ARBO", "RESPAT"], 
+        label_visibility = 'collapsed',
+        key = "project_table"
+    )
+
+    table = container.radio(
+        "**Arboviroses**",
+        options=project_tables[project],
+        key=f"tables_{project}"
+    )
+
+    return project, table
 
 if __name__ == "__main__":
     # Streamlit UI
     st.title("🤖 Monit Chat :dna:")
     sidebar = st.sidebar
-    sidebar.title("Tables")
-    
-    expander = sidebar.expander("## Arboviroses", expanded=False)
-    expander.radio(
-        "Table",
-        options=[
-            "Combined",
-        ]
-    )
-
-    sidebar.expander("Respat", expanded=False)
 
     widget_query(st)
