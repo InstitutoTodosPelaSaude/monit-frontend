@@ -20,4 +20,4 @@ services:
     depends_on:
       - streamlit
     ports:
-      - "8502:80"
+      - "8502:8502"
