@@ -1,6 +1,6 @@
 altair
 pandas
-streamlit
+streamlit>=1.41.0
 matplotlib
 psycopg2
 minio==7.2.9
