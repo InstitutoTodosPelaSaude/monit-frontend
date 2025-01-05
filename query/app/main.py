@@ -3,7 +3,7 @@ from openai import OpenAI
 
 from models import QueryParameters
 from prompt import ARBO_FIELDS, RESPAT_FIELDS
-from prompt import fill_table_name, get_prompt
+from prompt import apply_configs_to_sql_query, fill_table_name, get_prompt
 import json
 
 app = FastAPI()
@@ -19,6 +19,7 @@ def get_sql_query(params: QueryParameters):
     project  = params.project
     question = params.question
     table    = params.table
+    configs = params.configs
 
     prompt = get_prompt(question, project, table)
 
@@ -42,6 +43,7 @@ def get_sql_query(params: QueryParameters):
         raise HTTPException(status_code=500, detail=f"Error fetching SQL query from OpenAI: {str(e)}")
     
     sql_query = fill_table_name(sql_raw_query)
+    sql_query = apply_configs_to_sql_query(sql_query, configs)
 
     return {
         "sql": sql_query,

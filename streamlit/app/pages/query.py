@@ -37,13 +37,12 @@ def query_database(sql_query):
 
     return df
 
-def fetch_sql_query(question, project):
+def fetch_sql_query(question, project, table="combined", configs={}):
 
     try:
-        print({"question": question, "project": project, "table": "combined"},)
         response = requests.post(
             "http://query:8000/query",
-            json={"question": question, "project": project, "table": "combined"},
+            json={"question": question, "project": project, "table": table, "configs":configs },
         )
         response.raise_for_status()
         
@@ -56,24 +55,24 @@ def widget_query( container ):
 
     # Project selection
     project, table = widget_select_project_table(st.sidebar)
+    st.sidebar.divider()
+    configs = widget_configs(st.sidebar)
 
     container.markdown(f"Ask me anything about table **{table}** of **{project}**")
 
     # Question input
-    col_question, col_button_go = container.columns( [ 4, 1 ] )
+    col_question, _ = container.columns( [ 4, 1 ] )
+
     question = col_question.text_input("", label_visibility = 'collapsed')
 
     # SQL query prompt processing
     sql_query = None
 
-    if not col_button_go.button("Go!"):
+    if not question.strip():
         return
 
-    if not question.strip():
-        col_question.warning("Please enter a valid question.")
-
     try:
-        sql_query, sql_raw_query = fetch_sql_query(question, project)
+        sql_query, sql_raw_query = fetch_sql_query(question, project, configs=configs)
     except Exception as e:
         container.error(f"An error occurred: {e}")
         return
@@ -119,6 +118,18 @@ def widget_select_project_table(container):
     )
 
     return project, table
+
+def widget_configs(container):
+
+    configs = dict()
+    configs_container = container.expander("# :gear: Configs")
+
+    # maximum number of lines 100
+    max_num_lines = configs_container.number_input("Máx number of lines", min_value=1, step=1, value=500)
+
+    return {
+        "max_num_lines": max_num_lines
+    }
 
 if __name__ == "__main__":
     # Streamlit UI

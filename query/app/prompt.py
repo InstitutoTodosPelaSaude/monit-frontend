@@ -181,3 +181,16 @@ def fill_table_name(sql_raw_query):
     return sql_query
 
 
+def apply_configs_to_sql_query(sql_query, configs):
+
+    if not configs:
+        return sql_query
+    
+    sql_query_with_configs = sql_query
+    max_num_lines = configs.get('max_num_lines')
+    if max_num_lines:
+        sql_query_with_configs = sql_query_with_configs.replace(';', '')
+        sql_query_with_configs = f"SELECT * FROM ({sql_query_with_configs}) AS query_limit_num_of_lines LIMIT {max_num_lines}"
+
+    return sql_query_with_configs
+
