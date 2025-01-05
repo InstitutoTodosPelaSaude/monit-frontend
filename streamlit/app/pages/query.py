@@ -51,9 +51,9 @@ def fetch_sql_query(question, project, table="combined", configs={}):
     except requests.exceptions.RequestException as e:
         return None
 
-def widget_query( container ):
+def widget_query(container):
 
-    # Project selection
+    # Project selection and Query Configuration
     project, table = widget_select_project_table(st.sidebar)
     st.sidebar.divider()
     configs = widget_configs(st.sidebar)
@@ -65,12 +65,12 @@ def widget_query( container ):
 
     question = col_question.text_input("", label_visibility = 'collapsed')
 
-    # SQL query prompt processing
-    sql_query = None
 
+    # Check if a question was inputed
     if not question.strip():
         return
 
+    sql_query = None
     try:
         sql_query, sql_raw_query = fetch_sql_query(question, project, configs=configs)
     except Exception as e:
@@ -80,26 +80,40 @@ def widget_query( container ):
     if not sql_query:
         return
 
+    container.divider()
+    container.markdown("### Results")
+
+    sql_query_formatted = sqlparse.format(sql_raw_query, reindent=True, keyword_case='upper')
+
+    toggle_code = container.expander("Query", False)        
+    toggle_code.code(sql_query_formatted, language="sql")
+    
+    with container.spinner("Retrieving data..."):
+        widget_table_result(container, sql_query)
+
+
+def widget_table_result(container, sql_query):
+
     try:
         data = query_database(sql_query)
     except Exception as e:
         container.error(f"An error occurred: {e}")
         return
 
-    container.divider()
-    container.markdown("### Results")
-    container.dataframe(data)
+    container.dataframe(data, use_container_width=True, hide_index=True)
 
-    sql_query_formatted = sqlparse.format(sql_raw_query, reindent=True, keyword_case='upper')
 
-    toggle_code = container.expander("Query", False)        
-    toggle_code.code(sql_query_formatted, language="sql")
 
 def widget_select_project_table(container):
     
     project_tables = {
         "ARBO":["COMBINED"],
         "RESPAT":["COMBINED"]
+    }
+
+    project_name = {
+        "ARBO": "Arboviroses",
+        "RESPAT": "Respiratórios"
     }
 
     container.title("Tables")
@@ -112,7 +126,7 @@ def widget_select_project_table(container):
     )
 
     table = container.radio(
-        "**Arboviroses**",
+        f"**{project_name[project]}**",
         options=project_tables[project],
         key=f"tables_{project}"
     )
@@ -121,7 +135,6 @@ def widget_select_project_table(container):
 
 def widget_configs(container):
 
-    configs = dict()
     configs_container = container.expander("# :gear: Configs")
 
     # maximum number of lines 100
