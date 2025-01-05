@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, Query
 from openai import OpenAI
 
-from models import QueryParameters
+from models import QueryParameters, FormatQueryParameters
 from prompt import ARBO_FIELDS, RESPAT_FIELDS
 from prompt import apply_configs_to_sql_query, fill_table_name, get_prompt
 import json
@@ -50,3 +50,18 @@ def get_sql_query(params: QueryParameters):
         "raw_sql": sql_raw_query,
         "project": project
     }
+
+
+@app.post("/process")
+def get_sql_query(params: FormatQueryParameters):
+    
+    sql_raw_query = params.sql_raw_query
+    configs = params.configs
+
+    sql_query = fill_table_name(sql_raw_query)
+    sql_query = apply_configs_to_sql_query(sql_query, configs)
+    return {
+        "sql": sql_query,
+        "raw_sql": sql_raw_query,
+    }
+

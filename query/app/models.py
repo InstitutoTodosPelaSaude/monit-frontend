@@ -7,3 +7,7 @@ class QueryParameters(BaseModel):
     project: Literal["ARBO", "RESPAT"] = Field(..., description="Must be 'RESPAT' or 'ARBO'.")
     table: Literal["combined"] = Field(..., description="Must be 'combined'.")
     configs: Optional[dict] = Field(None, description="Optional configuration settings, such as 'max_lines'.")
+
+class FormatQueryParameters(BaseModel):
+    sql_raw_query: str = Field(..., description="Raw SQL query to format")
+    configs: Optional[dict] = Field(None, description="Optional configuration settings, such as 'max_lines'.")
