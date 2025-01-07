@@ -9,6 +9,17 @@ services:
       - ./streamlit:/streamlit
       - ./data:/data
       - ./streamlit/.streamlit:/root/.streamlit
+    ports:
+      - "8501:8501"
+
+  query:
+    build: ./query
+    env_file:
+      - .env
+    volumes:
+      - ./query/app:/app
+    ports:
+      - "8800:8000"
 
   nginx:
     build: ./nginx
