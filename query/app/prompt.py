@@ -17,7 +17,7 @@ COMMON_FIELDS = """
     epiweek_number	str	Epidemiological week number of the year.
     month	str	Month of the test, YYYY-MM.
     location	str	Name of the city.
-    state	str	Name of the state.
+    state	str	Name of the state. (e.g. São Paulo, Rio de Janeiro)
     country	str	Name of the country.
     region	str	Region (Norte, Nordeste, Centro-Oeste, Sudeste, Sul).
     macroregion	str	Macroregion grouping multiple regions (e.g., North, South).
