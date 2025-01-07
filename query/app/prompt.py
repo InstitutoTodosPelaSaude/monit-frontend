@@ -130,46 +130,8 @@ def fill_table_name(sql_raw_query):
         read_csv(
             's3://data/respat/data/combined/combined.tsv', 
             delim='\\t',
-            columns = {
-                "lab_id": "VARCHAR",
-                "sample_id": "VARCHAR",
-                "test_id": "VARCHAR",
-                "test_kit": "VARCHAR",
-                "sex": "VARCHAR",
-                "age": "INTEGER",
-                "date_testing": "DATE",
-                "patient_id": "VARCHAR",
-                "file_name": "VARCHAR",
-                "FLUA_test_result": "VARCHAR",
-                "FLUB_test_result": "VARCHAR",
-                "VSR_test_result": "VARCHAR",
-                "RINO_test_result": "VARCHAR",
-                "META_test_result": "VARCHAR",
-                "PARA_test_result": "VARCHAR",
-                "ADENO_test_result": "VARCHAR",
-                "BOCA_test_result": "VARCHAR",
-                "COVS_test_result": "VARCHAR",
-                "ENTERO_test_result": "VARCHAR",
-                "BAC_test_result": "VARCHAR",
-                "qty_original_lines": "VARCHAR",
-                "created_at": "TIMESTAMP",
-                "updated_at": "TIMESTAMP",
-                "age_group": "VARCHAR",
-                "epiweek_enddate": "DATE",
-                "epiweek_number": "VARCHAR",
-                "month": "VARCHAR",
-                "location": "VARCHAR",
-                "state": "VARCHAR",
-                "country": "VARCHAR",
-                "region": "VARCHAR",
-                "macroregion": "VARCHAR",
-                "macroregion_code": "VARCHAR",
-                "state_code": "VARCHAR",
-                "state_ibge_code": "VARCHAR",
-                "location_ibge_code": "VARCHAR",
-                "lat": "VARCHAR",
-                "long": "VARCHAR"
-            }
+            ignore_errors=True,
+            sample_size=1000
         ) 
         """
     }

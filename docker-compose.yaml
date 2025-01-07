@@ -10,7 +10,7 @@ services:
       - ./data:/data
       - ./streamlit/.streamlit:/root/.streamlit
     ports:
-      - "8501:8501"
+      - "8510:8501"
 
   query:
     build: ./query
