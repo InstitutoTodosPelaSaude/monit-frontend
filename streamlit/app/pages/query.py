@@ -212,3 +212,4 @@ if __name__ == "__main__":
 
     st.title("🤖 Monit Chat :dna:")
     widget_query(st)
+    st.sidebar.link_button(":arrow_left: Home", "main")

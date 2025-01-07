@@ -10,7 +10,7 @@ col_title.title("Hub")
 
 st.divider()
 
-col_central_arbo, col_central_respat = st.columns(2)
+col_central_arbo, col_central_respat, col_monit_chat = st.columns(3)
 
 col_central_arbo.link_button(
     ":mosquito: Arbo", "arbo", use_container_width = True
@@ -18,3 +18,5 @@ col_central_arbo.link_button(
 col_central_respat.link_button(
     ":lungs: Respat", "respat", use_container_width = True
 )
+
+col_monit_chat.link_button("🤖 Monit Chat", "query", use_container_width = True)
