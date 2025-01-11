@@ -110,7 +110,6 @@ class DownloadMatricesAndCombinedWidget(BaseWidget):
         self.labs = labs
         self.file_system = FileSystem(base_path)
 
-
     def render(self):
         relative_path = 'matrices/'
         accepted_extensions = ['.tsv', '.csv', '.xlsx', '.xls']
@@ -157,7 +156,6 @@ class DownloadMatricesAndCombinedWidget(BaseWidget):
         self.add_button_download_matrices()
         self.add_button_download_combined()
         self.container.divider()
-
 
     def add_button_download_matrices(self):
         
@@ -258,7 +256,6 @@ class ListFilesInTrashFoldersWidget(BaseWidget):
 
         self.selected_files = []
 
-
     def render(self):
         self.container.markdown("## :ok: Processados")
         
@@ -268,7 +265,6 @@ class ListFilesInTrashFoldersWidget(BaseWidget):
 
         self.add_button_restore_and_delete()        
         self.container.divider()
-
 
     def add_files_in_lab_folder(self, container, lab):
         relative_path = f'{lab}/_out/'
@@ -291,7 +287,6 @@ class ListFilesInTrashFoldersWidget(BaseWidget):
 
             if file_selected:
                 self.selected_files.append((lab, filename))
-
 
     def add_button_restore_and_delete(self):
 
@@ -333,7 +328,6 @@ class LastRunOfEachLabInfoWidget(BaseWidget):
         self.labs = labs
         self.dw_database = DWDatabaseInterface(**dw_database_connection_kwargs)
         self.dagster_database = DagsterDatabaseInterface(**dagster_database_connection_kwargs)
-
 
     def render(self):
         self.container.markdown("## :arrows_counterclockwise: Última Run")
@@ -378,7 +372,6 @@ class LastRunOfEachLabInfoWidget(BaseWidget):
             self.add_lab_last_run_status(col_status, last_run_lab)
         
         self.container.divider()
-
     
     def add_lab_latest_date(self, container, latest_date_lab):
 
@@ -390,7 +383,6 @@ class LastRunOfEachLabInfoWidget(BaseWidget):
         latest_date = latest_date_lab[1]
         latest_date = latest_date.strftime("%b %d")
         container.markdown(f"_Dados até {latest_date}_")
-
 
     def add_lab_last_run_status(self, container, last_run_lab):
 
@@ -531,7 +523,6 @@ class ITPSFooterWidget(BaseWidget):
         self.container.write("#")
         self.container.divider()
         self.container.markdown(f"DEVELOPED BY [ITpS](https://www.itps.org.br/). lc-{commit_hash}, {commit_date}.")
-
 
     def read_version_file(self):
         file_content = "UNK_COMMIT UNK_DATE"
