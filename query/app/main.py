@@ -2,8 +2,8 @@ from fastapi import FastAPI, HTTPException, Query
 from openai import OpenAI
 
 from models import QueryParameters, FormatQueryParameters
-from prompt import ARBO_FIELDS, RESPAT_FIELDS
-from prompt import apply_configs_to_sql_query, fill_table_name, get_prompt
+from prompt import ARBO_COMBINED_FIELDS, RESPAT_COMBINED_FIELDS
+from prompt import apply_configs_to_sql_query, replace_table_name_in_prompt_by_table_name_in_database, get_prompt
 import json
 
 app = FastAPI()
@@ -42,7 +42,7 @@ def get_sql_query(params: QueryParameters):
         # RETURN 500 error
         raise HTTPException(status_code=500, detail=f"Error fetching SQL query from OpenAI: {str(e)}")
     
-    sql_query = fill_table_name(sql_raw_query)
+    sql_query = replace_table_name_in_prompt_by_table_name_in_database(sql_raw_query)
     sql_query = apply_configs_to_sql_query(sql_query, configs)
 
     return {
@@ -58,7 +58,7 @@ def get_sql_query(params: FormatQueryParameters):
     sql_raw_query = params.sql_raw_query
     configs = params.configs
 
-    sql_query = fill_table_name(sql_raw_query)
+    sql_query = replace_table_name_in_prompt_by_table_name_in_database(sql_raw_query)
     sql_query = apply_configs_to_sql_query(sql_query, configs)
     return {
         "sql": sql_query,

@@ -62,17 +62,21 @@ def sql_query_is_a_read_only_query(sql_query):
 
     all_sql_queries_tokenized = sqlparse.parse(sql_query)
 
+    if len(all_sql_queries_tokenized) != 1:
+        # If there are more than two or any SQL statements 
+        return False
+
     forbidden_commands = {
         "INSERT", "UPDATE", "SET", "DELETE", "MERGE", "UPSERT", "REPLACE", # DML
         "CREATE", "DROP", "ALTER", "TRUNCATE", "RENAME", # DDL
         "EXEC", "EXECUTE", "CALL"
     }
 
-    for sql_tokenized in all_sql_queries_tokenized:
-        for token in sql_tokenized.tokens:
-            if token.value in forbidden_commands:
-                if str(token.ttype).startswith("Token.Keyword"):
-                    return False
+    sql_tokenized = all_sql_queries_tokenized[0]
+    for token in sql_tokenized.tokens:
+        if token.value in forbidden_commands:
+            if str(token.ttype).startswith("Token.Keyword"):
+                return False
             
     return True
 

@@ -1,5 +1,5 @@
 
-COMMON_FIELDS = """
+COMMON_COMBINED_FIELDS = """
     Column Name	Type	Description
     lab_id str lab name. One of: DBMOL, EINSTEIN, FLEURY, HILAB, HLAGYN, SABIN, TARGET, HPARDINI, DASA
     sample_id str	Unique identifier for the biological sample used in the test.
@@ -29,10 +29,10 @@ COMMON_FIELDS = """
     long	str	Longitude of the city or testing location.
 """
 
-ARBO_FIELDS = f"""
+ARBO_COMBINED_FIELDS = f"""
     The table `ARBOVIROSES_TABLE` combined contains information about test results for arbovirus.
     Data dictionary:
-    {COMMON_FIELDS}
+    {COMMON_COMBINED_FIELDS}
     test_kit str	Name or code of the test kit used for diagnosis. One of: arbo_pcr_3, chikv_pcr, denv_antigen, denv_pcr, denv_serum, igg_serum, igm_serum, mayv_pcr, ns1_antigen, orov_pcr, yfv_pcr, zikv_pcr
     DENV_test_result	str	Dengue  result: Pos (Positive), Neg (Negative), or NT (Not Tested).
     ZIKV_test_result	str	Zika result
@@ -43,10 +43,10 @@ ARBO_FIELDS = f"""
     WNV_test_result	    str	West Nile result
 """
 
-RESPAT_FIELDS = F"""
+RESPAT_COMBINED_FIELDS = F"""
     The table `RESPAT_TABLE` contains information about test results for respiratory pathogens.
     Data dictionary:
-    {COMMON_FIELDS}
+    {COMMON_COMBINED_FIELDS}
     test_kit str	Name or code of the test kit used for diagnosis. One of: adeno_iga,adeno_igg,adeno_igm,adeno_pcr,bac_antigen,bac_igg,bac_igm,bac_pcr,covid_antibodies,covid_antigen,covid_iga,covid_pcr,flua_igg,flua_igm,flu_antigen,flub_igg,flub_igm,flu_pcr,sc2_igg,test_14,test_21,test_23,test_24,test_3,test_4,thermo,vsr_antigen,vsr_igg,    SC2_test_result str SARS-CoV-2 result: Pos (Positive), Neg (Negative), or NT (Not Tested).
     FLUA_test_result    str Influenza A result
     FLUB_test_result    str Influenza B result
@@ -61,84 +61,59 @@ RESPAT_FIELDS = F"""
     BAC_test_result str Bacteria result
 """
 
+project_and_table_to_data_dictonary_and_metadata = {
+
+    "ARBO":{
+        "combined": {
+            "data_dictonary": ARBO_COMBINED_FIELDS,
+            "table_prompt_name": "ARBOVIROSES_TABLE",
+            "table_database_name": """
+                read_csv(
+                    's3://data/arbo/data/combined/combined.tsv',   
+                    delim='\\t',
+                    sample_size=1000
+                )
+            """
+        }
+    },
+
+    "RESPAT":{
+        "combined": {
+            "data_dictonary": RESPAT_COMBINED_FIELDS,
+            "table_prompt_name": "RESPAT_TABLE",
+            "table_database_name": """
+                read_csv(
+                    's3://data/respat/data/combined/combined.tsv', 
+                    delim='\\t',
+                    ignore_errors=True,
+                    sample_size=1000
+                ) 
+            """
+        }
+    }
+}
+
 def get_prompt(question, project, table):
 
-    data_dictonary = (
-        RESPAT_FIELDS if project == 'RESPAT' 
-        else ARBO_FIELDS
-    )
+    data_dictonary = project_and_table_to_data_dictonary_and_metadata[project][table]["data_dictonary"]
 
     prompt = f"""
         {data_dictonary}
         Create a SQL query to answer the following question betwen <q>: <q>{question}<q>"
     """ + """
         Return the SQL query in a JSON formatted as follows {query: response}.
-        The query need to be formatted using \t and \n to be displayed correctly in the widget.
     """
 
     return prompt
 
-def fill_table_name(sql_raw_query):
-
-    dict_table_name = {
-        "ARBOVIROSES_TABLE": 
-        """
-        read_csv(
-            's3://data/arbo/data/combined/combined.tsv',   
-            delim='\\t',
-            columns = {
-                "lab_id": "VARCHAR",
-                "sample_id": "VARCHAR",
-                "test_id": "VARCHAR",
-                "test_kit": "VARCHAR",
-                "sex": "VARCHAR",
-                "age": "INTEGER",
-                "date_testing": "DATE",
-                "patient_id": "VARCHAR",
-                "file_name": "VARCHAR",
-                "DENV_test_result": "VARCHAR",
-                "ZIKV_test_result": "VARCHAR",
-                "CHIKV_test_result": "VARCHAR",
-                "YFV_test_result": "VARCHAR",
-                "MAYV_test_result": "VARCHAR",
-                "OROV_test_result": "VARCHAR",
-                "WNV_test_result": "VARCHAR",
-                "qty_original_lines": "VARCHAR",
-                "created_at": "TIMESTAMP",
-                "updated_at": "TIMESTAMP",
-                "age_group": "VARCHAR",
-                "epiweek_enddate": "DATE",
-                "epiweek_number": "VARCHAR",
-                "month": "VARCHAR",
-                "location": "VARCHAR",
-                "state": "VARCHAR",
-                "country": "VARCHAR",
-                "region": "VARCHAR",
-                "macroregion": "VARCHAR",
-                "macroregion_code": "VARCHAR",
-                "state_code": "VARCHAR",
-                "state_ibge_code": "VARCHAR",
-                "location_ibge_code": "VARCHAR",
-                "lat": "VARCHAR",
-                "long": "VARCHAR"
-            }
-        )
-        """,
-
-        "RESPAT_TABLE":
-        """
-        read_csv(
-            's3://data/respat/data/combined/combined.tsv', 
-            delim='\\t',
-            ignore_errors=True,
-            sample_size=1000
-        ) 
-        """
-    }
-
+def replace_table_name_in_prompt_by_table_name_in_database(sql_raw_query):
     sql_query = sql_raw_query
-    for table_generic_name, table_name_in_the_database in dict_table_name.items():
-        sql_query = sql_query.replace(table_generic_name, table_name_in_the_database)
+    for _, table_data_dictonaries in project_and_table_to_data_dictonary_and_metadata.items():
+        for _, data_dictonary in table_data_dictonaries.items():
+            sql_query = sql_query.replace(
+                data_dictonary["table_prompt_name"], 
+                data_dictonary["table_database_name"]
+            )
 
     return sql_query
 
