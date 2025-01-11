@@ -250,7 +250,10 @@ class DuckDBMinioInterface():
         """)
     
     def query(self, query):
-        df = self.conn.execute(query).fetchdf()
-        return df
+        try:
+            df = self.conn.execute(query).fetchdf()
+            return df
+        except Exception as e:
+            return None
     
     

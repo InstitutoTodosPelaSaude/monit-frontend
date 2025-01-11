@@ -1,12 +1,10 @@
 import streamlit as st
 
-import os
 import sys
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-import duckdb
 from page_widgets.query_generator import widget_query
 
 import streamlit as st
