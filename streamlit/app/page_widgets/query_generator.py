@@ -24,12 +24,17 @@ def get_database_connection():
 def query_database(sql_query):
     return get_database_connection().query(sql_query)
 
+def widget_go_to_datadict(container):
+    container.page_link("pages/datadict.py", icon="📘", label="Data Dictionary")
+
 def widget_query(container):
 
     # Project selection and Query Configuration
     project, table = widget_select_project_and_table(st.sidebar)
     st.sidebar.divider()
     configs = widget_configs(st.sidebar)
+    widget_go_to_datadict(st.sidebar)
+
 
     container.markdown(f"Ask me anything about table **{table}** of **{project}**")
 
@@ -169,7 +174,7 @@ def widget_configs(container):
     configs_container = container.expander("# :gear: Configs")
 
     # maximum number of lines 100
-    max_num_lines = configs_container.number_input("Máx number of lines", min_value=1, step=1, value=500)
+    max_num_lines = configs_container.number_input("Max. number of lines", min_value=1, step=1, value=500)
 
     return {
         "max_num_lines": max_num_lines

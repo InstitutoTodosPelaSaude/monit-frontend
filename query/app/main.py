@@ -1,9 +1,9 @@
 from fastapi import FastAPI, HTTPException, Query
 from openai import OpenAI
 
-from models import QueryParameters, FormatQueryParameters
+from models import QueryParameters, FormatQueryParameters, DatadictParmeters
 from prompt import ARBO_COMBINED_FIELDS, RESPAT_COMBINED_FIELDS
-from prompt import apply_configs_to_sql_query, replace_table_name_in_prompt_by_table_name_in_database, get_prompt
+from prompt import apply_configs_to_sql_query, replace_table_name_in_prompt_by_table_name_in_database, get_prompt, get_table_data_dictionary
 import json
 
 app = FastAPI()
@@ -12,10 +12,30 @@ app = FastAPI()
 def read_root():
     return {"message": "API is working"}
 
+@app.post("/datadict")
+def get_datadict_for_table(params: DatadictParmeters):
+    project  = params.project
+    table    = params.table
+    return get_table_data_dictionary(project, table)
+
+@app.post("/prompt")
+def get_prompt_for_question(params: QueryParameters):
+    project  = params.project
+    question = params.question
+    table    = params.table
+    prompt = get_prompt(question, project, table)
+
+    return {
+        "project": project,
+        "question": question,
+        "table": table,
+        "prompt": prompt,
+    }
+
+
 @app.post("/query")
 def get_sql_query(params: QueryParameters):
 
-    # IF project IS NOT RESPAT or ARBO the return error BAD REQUEST
     project  = params.project
     question = params.question
     table    = params.table

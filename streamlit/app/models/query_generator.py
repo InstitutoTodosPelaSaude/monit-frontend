@@ -27,3 +27,17 @@ def format_sql_query(sql_raw_query, configs={}):
         return response_data.get("sql", "No query found"), response_data.get("raw_sql", "No query found")
     except requests.exceptions.RequestException as e:
         return None
+    
+def fetch_datadict(project, table):
+
+    try:
+        response = requests.post(
+            f"{QUERY_API_URL}/datadict",
+            json={"project": project, "table":table },
+        )
+        response.raise_for_status()
+        
+        response_data = response.json()
+        return response_data
+    except requests.exceptions.RequestException as e:
+        return None
