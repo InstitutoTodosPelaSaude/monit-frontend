@@ -5,6 +5,8 @@ from psycopg2 import InterfaceError, OperationalError
 from psycopg2.errors import UndefinedTable, InFailedSqlTransaction
 import abc
 
+import duckdb
+
 class PostgresqlDatabaseInterface(abc.ABC):
     
     def __init__(self, user, password, host, port, database):
@@ -221,3 +223,37 @@ class DWDatabaseInterface (PostgresqlDatabaseInterface):
                     lab_counts_by_epiweek[join_lab_and_epiweek(lab, epiweek)] = 0
 
         return lab_counts_by_epiweek
+
+
+class DuckDBMinioInterface():
+
+    # define static method for singleton pattern
+    @staticmethod
+    def get_instance(minio_endpoint, minio_access_key, minio_secret_key):
+        if not hasattr(DuckDBMinioInterface, "__instance"):
+            DuckDBMinioInterface.__instance = DuckDBMinioInterface( 
+                minio_endpoint, minio_access_key, minio_secret_key
+            )
+        return DuckDBMinioInterface.__instance
+    
+    def __init__(self, minio_endpoint, minio_access_key, minio_secret_key):
+        self.conn = duckdb.connect(database=':memory:', read_only=False)
+        self.conn.execute(f"""
+            INSTALL httpfs;
+            LOAD httpfs;
+            SET s3_region='us-east-1'; -- This is ignore by MinIO
+            SET s3_url_style='path';
+            SET s3_endpoint='{minio_endpoint}';
+            SET s3_access_key_id='{minio_access_key}';
+            SET s3_secret_access_key='{minio_secret_key}';
+            SET s3_use_ssl = false;
+        """)
+    
+    def query(self, query):
+        try:
+            df = self.conn.execute(query).fetchdf()
+            return df
+        except Exception as e:
+            return None
+    
+    

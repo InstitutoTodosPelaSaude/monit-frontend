@@ -18,5 +18,6 @@ col_central_arbo.link_button(
 col_central_respat.link_button(
     ":lungs: Respat", "respat", use_container_width = True
 )
-
-col_monit_chat.link_button("🤖 Monit Chat", "query", use_container_width = True)
+col_monit_chat.link_button(
+    "🤖 Monit Chat", "query", use_container_width = True
+)
