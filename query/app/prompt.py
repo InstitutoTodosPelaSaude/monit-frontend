@@ -31,7 +31,7 @@ COMMON_COMBINED_FIELDS = [
 ARBO_COMBINED_FIELDS = [
     *COMMON_COMBINED_FIELDS,
     ("test_kit" ,"str",	"Name of the test kit used for diagnosis. One of: arbo_pcr_3, chikv_pcr, denv_antigen, denv_pcr, denv_serum, igg_serum, igm_serum, mayv_pcr, ns1_antigen, orov_pcr, yfv_pcr, zikv_pcr"),
-    ("DENV_test_result"	,"str",	"Dengue  result: Pos (Positive), Neg (Negative), or NT (Not Tested)."),
+    ("DENV_test_result"	,"str",	"Dengue  result"),
     ("ZIKV_test_result"	,"str",	"Zika result"),
     ("CHIKV_test_result"	,"str",	"Chikungunya result"),
     ("YFV_test_result"	    ,"str",	"Yellow fever result"),
@@ -42,7 +42,8 @@ ARBO_COMBINED_FIELDS = [
 
 RESPAT_COMBINED_FIELDS = [
     *COMMON_COMBINED_FIELDS,
-    ("test_kit", "str",	"Name of the test kit used for diagnosis. One of: adeno_iga,adeno_igg,adeno_igm,adeno_pcr,bac_antigen,bac_igg,bac_igm,bac_pcr,covid_antibodies,covid_antigen,covid_iga,covid_pcr,flua_igg,flua_igm,flu_antigen,flub_igg,flub_igm,flu_pcr,sc2_igg,test_14,test_21,test_23,test_24,test_3,test_4,thermo,vsr_antigen,vsr_igg,    SC2_test_result str SARS-CoV-2 result: Pos (Positive), Neg (Negative), or NT (Not Tested)."),
+    ("test_kit", "str",	"Name of the test kit used for diagnosis. One of: ad\eno_iga,adeno_igg,adeno_igm,adeno_pcr,bac_antigen,bac_igg,bac_igm,bac_pcr,covid_antibodies,covid_antigen,covid_iga,covid_pcr,flua_igg,flua_igm,flu_antigen,flub_igg,flub_igm,flu_pcr,sc2_igg,test_14,test_21,test_23,test_24,test_3,test_4,thermo,vsr_antigen,vsr_igg"),
+    ("SC2_test_result", "str", "SARS-CoV-2 result"),
     ("FLUA_test_result",    "str", "Influenza A result"),
     ("FLUB_test_result",    "str", "Influenza B result"),
     ("VSR_test_result", "str", "VSR result"),
@@ -62,7 +63,22 @@ project_and_table_to_data_dictionary_and_metadata = {
         "combined": {
             "data_dictonary": ARBO_COMBINED_FIELDS,
             "table_prompt_name": "ARBOVIROSES_TABLE",
-            "table_description": "The table `ARBOVIROSES_TABLE` contains information about test results for arbovirus.",
+            "table_description": """
+                The table `ARBOVIROSES_TABLE` contains information about test results for arbovirus.
+                
+                Business Rules:
+                
+                a) The columns XXYYZZ_test_result have 3 possible values: 'Pos' (Positive), 'Neg' (Negative), or 'NT' (Not Tested).
+                b) Positivity Rate of a pathogen definition: (number of Pos)/(number of Pos + number of Neg) if (number of Pos + number of Neg) >= 50 else NULL
+                c) Each value in the column 'test_kit' contains results for a set of pathogens, described below:
+                    arbo_pcr_3 → Dengue, Zika, Chikungunya
+                    chikv_pcr → Chikungunya
+                    denv_antigen, denv_pcr, denv_serum, igg_serumm, igm_serum, ns1_antigen → Dengue
+                    mayv_pcr → Mayaro
+                    orov_pcr → Oropouche
+                    yfv_pcr → Yellow fever
+                    zikv_pcr → Zika
+            """,
             "table_database_name": """
                 read_csv(
                     's3://data/arbo/data/combined/combined.tsv',   
@@ -77,7 +93,26 @@ project_and_table_to_data_dictionary_and_metadata = {
         "combined": {
             "data_dictonary": RESPAT_COMBINED_FIELDS,
             "table_prompt_name": "RESPAT_TABLE",
-            "table_description": "The table `RESPAT_TABLE` contains information about test results for respiratory pathogens.",
+            "table_description": """
+                The table `RESPAT_TABLE` contains information about test results for respiratory pathogens.
+
+                a) The columns XXYYZZ_test_result have 3 possible values: 'Pos' (Positive), 'Neg' (Negative), or 'NT' (Not Tested).
+                b) Positivity Rate of a pathogen definition: (number of Pos)/(number of Pos + number of Neg) if (number of Pos + number of Neg) >= 50 else NULL
+                c) Each value in the column 'test_kit' contains results for a set of pathogens, described below:
+                    adeno_iga, adeno_igg, adeno_igm, adeno_pcr → Adenovirus  
+                    bac_antigen, bac_igg, bac_igm, bac_pcr → Bacteria  
+                    covid_antibodies, covid_antigen, covid_iga, covid_pcr, sc2_igg, thermo → SARS-CoV-2  
+                    flua_igg, flua_igm → Influenza A  
+                    flub_igg, flub_igm → Influenza B  
+                    flu_antigen, flu_pcr → Influenza A, Influenza B  
+                    vsr_antigen, vsr_igg → VSR  
+                    test_3 → Influenza A, Influenza B, VSR  
+                    test_4 → SARS-CoV-2, Influenza A, Influenza B, VSR  
+                    test_14 → SARS-CoV-2, Adenovirus, Bocavirus, Sazonal Coronaviruses, Enterovirus, Influenza A, Influenza B, Metapneumovirus, Parainfluenza, Rinovirus, VSR  
+                    test_21 → SARS-CoV-2, Adenovirus, Sazonal Coronaviruses, Influenza A, Influenza B, Metapneumovirus, Parainfluenza, Rinovirus, VSR, Bacteria  
+                    test_23 → SARS-CoV-2, Adenovirus, Bocavirus, Sazonal Coronaviruses, Influenza A, Influenza B, Metapneumovirus, Parainfluenza, Rinovirus, VSR, Bacteria  
+                    test_24 → SARS-CoV-2, Adenovirus, Bocavirus, Sazonal Coronaviruses, Enterovirus, Influenza A, Influenza B, Metapneumovirus, Parainfluenza, Rinovirus, VSR, Bacteria
+            """,
             "table_database_name": """
                 read_csv(
                     's3://data/respat/data/combined/combined.tsv', 

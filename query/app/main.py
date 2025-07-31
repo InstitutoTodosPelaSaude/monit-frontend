@@ -47,7 +47,7 @@ def get_sql_query(params: QueryParameters):
         client = OpenAI()
 
         response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4o-mini",
             response_format={ "type": "json_object" },
             messages=[{"role": "user", "content": prompt}]
         )
