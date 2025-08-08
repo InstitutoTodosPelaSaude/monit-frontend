@@ -1,9 +1,9 @@
-# MongoDB 8.x oficial
+# Official MongoDB 8.x
 FROM mongo:8.0
 
-# Copia config e scripts de init
+# Copy config and init scripts
 COPY mongod.conf /etc/mongo/mongod.conf
 COPY init/ /docker-entrypoint-initdb.d/
 
-# Permissões para os scripts
+# Permissions for the scripts
 RUN chmod -R 0755 /docker-entrypoint-initdb.d

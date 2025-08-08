@@ -3,9 +3,9 @@ from beanie import Document
 
 router = APIRouter()
 
-@router.get("/health", summary="Health check da API e do MongoDB/Beanie")
+@router.get("/health", summary="Health check for the API and MongoDB/Beanie")
 async def health_check():
-    # comando simples no admin para validar conexão
-    from beanie import init_beanie  # força import carregado
-    # se init_beanie falhou, a app nem sobe; aqui só retorna ok
+    # simple command in admin to validate connection
+    from beanie import init_beanie  # force import loaded
+    # if init_beanie failed, the app doesn't even start; here just return ok
     return {"status": "ok"}
