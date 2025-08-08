@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .database import lifespan
+from app.database import lifespan
 
-from .routes.health import router as health_router
-from .routes.users import router as users_router
+from app.routes.health import router as health_router
+from app.routes.users import router as users_router
 
 app = FastAPI(
     title="Monit API",

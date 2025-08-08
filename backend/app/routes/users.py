@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Query
-from ..schemas.users import UserCreate, UserOut
-from ..crud.users import create_user, get_user_by_email, list_users, delete_user
+from app.schemas.users import UserCreate, UserOut
+from app.crud.users import create_user, get_user_by_email, list_users, delete_user
 
 router = APIRouter(prefix="/users", tags=["users"])
 

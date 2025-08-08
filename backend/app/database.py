@@ -6,7 +6,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from beanie import init_beanie
 
 # IMPORT HERE all Document models registered in Beanie
-from .models.user import User
+from app.models.user import User
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
@@ -30,7 +30,7 @@ async def lifespan(app: FastAPI):
         # validate connection at startup
         await _motor_client[settings.MONGO_DB].command("ping")
 
-        print(f"[startup] Connected to MongoDB: {settings.MONGO_URI}")
+        print(f"[startup] Connected to MongoDB")
 
         # register documents in Beanie + create/update declared indexes
         docs: Sequence[type] = [User]

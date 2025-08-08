@@ -1,7 +1,7 @@
 from typing import List, Optional
 from beanie import PydanticObjectId
-from ..models.user import User
-from ..schemas.users import UserCreate
+from app.models.user import User
+from app.schemas.users import UserCreate
 
 async def create_user(payload: UserCreate) -> User:
     user = User(email=payload.email, name=payload.name)
