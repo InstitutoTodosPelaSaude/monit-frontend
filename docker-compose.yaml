@@ -23,6 +23,31 @@ services:
     networks:
       - private
 
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    environment:
+      # Passa as variáveis necessárias para a app
+      MONGO_URI: ${MONGO_URI}
+      MONGO_DB: ${MONGO_DB}
+      APP_ENV: ${APP_ENV}
+    ports:
+      - "${APP_PORT}:8000"
+    volumes:
+      - ./backend/app:/app/app
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - private
+
 networks:
   private:
     driver: bridge
