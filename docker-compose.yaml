@@ -1,34 +1,28 @@
-version: '2'
 services:
-
-  streamlit:
-    build: ./streamlit
-    env_file:
-      - .env
-    volumes:
-      - ./streamlit:/streamlit
-      - ./data:/data
-      - ./streamlit/.streamlit:/root/.streamlit
-    ports:
-      - "8510:8501"
-
-  query:
-    build: ./query
-    env_file:
-      - .env
-    volumes:
-      - ./query/app:/app
-    ports:
-      - "8800:8000"
-
-  nginx:
-    build: ./nginx
-    env_file:
-      - .env
+  mongodb:
+    build: ./mongodb
+    restart: unless-stopped
     environment:
-      BASIC_USERNAME: ${DAGSTER_UI_USERNAME}
-      BASIC_PASSWORD: ${DAGSTER_UI_PASSWORD}
-    depends_on:
-      - streamlit
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      MONGO_APP_DB: ${MONGO_APP_DB}
+      MONGO_APP_USER: ${MONGO_APP_USER}
+      MONGO_APP_PASS: ${MONGO_APP_PASS}
+    command: ["mongod", "--config", "/etc/mongo/mongod.conf", "--port", "${MONGO_PORT}"]
     ports:
-      - "8502:8502"
+      - "${MONGO_PORT}:${MONGO_PORT}"
+    volumes:
+      - ./mongodb/data:/data/db
+      - ./mongodb/mongod.conf:/etc/mongo/mongod.conf:ro
+      - ./mongodb/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mongosh", "--port", "${MONGO_PORT}", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - private
+
+networks:
+  private:
+    driver: bridge
