@@ -12,11 +12,11 @@ RUN useradd -m -u 10001 appuser && \
 WORKDIR /app
 
  # Install dependencies
-COPY backend/requirements.txt /app/requirements.txt
+COPY monit-chat-api/requirements.txt /app/requirements.txt
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
  # Copy code
-COPY backend/app /app/app
+COPY monit-chat-api/app /app/app
 
  # Port exposure (default 8000 internal)
 EXPOSE 8000

@@ -1,7 +1,6 @@
 services:
   mongodb:
     build: ./mongodb
-    restart: unless-stopped
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
@@ -15,39 +14,21 @@ services:
       - ./mongodb/data:/data/db
       - ./mongodb/mongod.conf:/etc/mongo/mongod.conf:ro
       - ./mongodb/init:/docker-entrypoint-initdb.d:ro
-    healthcheck:
-      test: ["CMD", "mongosh", "--port", "${MONGO_PORT}", "--eval", "db.adminCommand('ping')"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - private
 
-  api:
+  monit-chat-api:
     build:
       context: .
-      dockerfile: backend/Dockerfile
-    restart: unless-stopped
-    depends_on:
-      mongodb:
-        condition: service_healthy
+      dockerfile: monit-chat-api/Dockerfile
     environment:
-      # Passa as variáveis necessárias para a app
       MONGO_URI: ${MONGO_URI}
       MONGO_DB: ${MONGO_DB}
       APP_ENV: ${APP_ENV}
     ports:
       - "${APP_PORT}:8000"
     volumes:
-      - ./backend/app:/app/app
+      - ./monit-chat-api/app:/app/app
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://localhost:8000/health || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
-    networks:
-      - private
-
-networks:
-  private:
-    driver: bridge
