@@ -8,7 +8,7 @@ from app.crud.exceptions import UserAlreadyExists
 from pymongo.errors import DuplicateKeyError
 
 async def create_user(payload: UserCreate) -> User:
-    user = User(email=payload.email, name=payload.name)
+    user = User(email=payload.email, name=payload.name, password=payload.password)
 
     db = MongoConnection.get_client()
     db_collection = db.users
