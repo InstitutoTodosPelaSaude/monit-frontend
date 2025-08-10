@@ -5,7 +5,6 @@ class UserCreate(BaseModel):
     name: str | None = Field(default=None, max_length=120)
 
 class UserOut(BaseModel):
-    id: str
     email: EmailStr
     name: str | None
-    is_active: bool
+    is_active: bool = True

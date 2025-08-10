@@ -1,16 +1,29 @@
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, status
 from app.schemas.users import UserCreate, UserOut
 from app.crud.users import create_user, get_user_by_email, list_users
+
+from app.crud.exceptions import UserAlreadyExists
 
 router = APIRouter(prefix="/users", tags=["users"])
 
 @router.post("", response_model=UserOut, status_code=201, summary="Cria usuário")
 async def create_user_route(payload: UserCreate):
-    exists = await get_user_by_email(payload.email)
-    if exists:
-        raise HTTPException(status_code=409, detail="email já cadastrado")
-    doc = await create_user(payload)
-    return UserOut(id=str(doc.id), email=doc.email, name=doc.name, is_active=doc.is_active)
+    
+    try:
+        await create_user(payload)
+    except UserAlreadyExists as e:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=str(e)
+        )
+    except Exception as e:
+        # Erro genérico não esperado
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )
+
+    return UserOut(email=payload.email, name=payload.name)
 
 @router.get("", response_model=list[UserOut], summary="Lista usuários")
 async def list_users_route(limit: int = Query(50, le=200), skip: int = 0):
