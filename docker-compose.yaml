@@ -27,8 +27,3 @@ services:
       - "${APP_PORT}:8000"
     volumes:
       - ./monit-chat-api/app:/app/app
-    healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost:8000/health || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 5

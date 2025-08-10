@@ -1,14 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.database import lifespan
 
-from app.routes.health import router as health_router
 from app.routes.users import router as users_router
 
 app = FastAPI(
     title="Monit API",
-    version="1.0.0",
-    lifespan=lifespan,
+    version="1.0.0"
 )
 
  # CORS settings
@@ -21,6 +18,5 @@ app.add_middleware(
 )
 
  # Routes
-app.include_router(health_router, tags=["health"])
 app.include_router(users_router, tags=["users"])
 

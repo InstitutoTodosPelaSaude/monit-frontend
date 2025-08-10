@@ -4,5 +4,4 @@ pydantic==2.8.2
 pydantic-settings==2.4.0
 pydantic[email]==2.8.2
 motor>=3.7.1
-beanie==1.26.0
 python-dotenv==1.0.0
