@@ -10,7 +10,7 @@ class Chat(BaseModel):
     id: str | None = Field(default=None, serialization_alias="_id")
     user_id: str
     name: str
-    messages: list[str] = Field(default_factory=list)
+    messages: list[Any] = Field(default_factory=list)
 
     @model_validator(mode='after')
     def create_id(self):
@@ -24,3 +24,9 @@ class Chat(BaseModel):
         del dict_repr['id']
         dict_repr["type"] = "CHAT"
         return dict_repr
+
+class UserMessage(BaseModel):
+    message: str
+    author: str = "USER"
+    type: str = "MESSAGE"
+    created_at: datetime = Field(default_factory=datetime.now)
