@@ -1,11 +1,11 @@
 from app.models.chat import Chat, UserMessage, ChatBotMessage, Table
+from app.schemas.chat import TableCreate
 
 from app.crud.database import MongoConnection
 from app.crud.exceptions import ChatIDNotFound, TableAlreadyExists
 from app.crud.users import read_user_by_id
-from app.crud.query import generate_sql_query_to_answer_question
 
-from app.schemas.chat import TableColumnCreate, TableCreate, TableMetadataCreate
+# from app.services.chat_flow import trigger_chatbot_response_flow
 
 from pymongo.errors import DuplicateKeyError
 
@@ -23,23 +23,18 @@ async def create_chat(user_id, name="<chat>"):
 
     return new_chat
 
-async def create_bot_reply_message(chat_id: str, user_message: str) -> ChatBotMessage:
+async def create_bot_reply_message(chat_id: str, message: ChatBotMessage) -> ChatBotMessage:
     db = MongoConnection.get_client()
     db_collection = db.chat
 
     chat = await read_chat_by_id(chat_id)
 
-    # [WIP] Create AI response logic
-    message = user_message
-    generated_query = generate_sql_query_to_answer_question(message)
-    
-    new_msg = ChatBotMessage(message=user_message, generated_query=generated_query)
     db_collection.update_one(
         {"_id": chat_id},
-        {"$push": {"messages": new_msg.model_dump()}}
+        {"$push": {"messages": message.model_dump()}}
     )
 
-    return new_msg
+    return message
 
 async def create_user_message(chat_id, message="<message>"):
     db = MongoConnection.get_client()

@@ -4,7 +4,7 @@ from typing import Tuple, Any, Literal
 import hashlib
 import secrets
 
-from app.crud.query import SQLGeneratedResponse
+from app.models.query import SQLGeneratedResponse
 
 class Chat(BaseModel):
 

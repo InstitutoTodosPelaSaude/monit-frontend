@@ -1,27 +1,15 @@
+
 from pydantic import BaseModel, model_validator
 from typing import List, Literal
 from app.crud.database import MongoConnection
 
 from openai import OpenAI
-
-
-class SQLGeneratedResponse(BaseModel):
-    query: str = "<INVALID>"
-    is_a_valid_sql_question: bool = False
-
-    @model_validator(mode='after')
-    def check_valid_sql_question(self):
-        if not self.is_a_valid_sql_question:
-           self.query = "<INVALID>" 
-        return self
     
-class SQLTableSelectionResponse(BaseModel):
-    tables: list[str]
+from app.models.query import SQLGeneratedResponse, SQLTableSelectionResponse
 
+client = OpenAI()    
 
-client = OpenAI()
-
-def select_tables_that_can_answer_this_question(question):
+def select_tables_to_answer_question(question):
 
     db = MongoConnection.get_client()
     db_collection = db.chat
@@ -58,7 +46,7 @@ def select_tables_that_can_answer_this_question(question):
 
 def generate_sql_query_to_answer_question(question):
 
-    selected_tables = select_tables_that_can_answer_this_question(question)
+    selected_tables = select_tables_to_answer_question(question)
     if not selected_tables:
         return SQLGeneratedResponse()
 
