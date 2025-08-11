@@ -18,9 +18,12 @@ async def create_user(payload: UserCreate) -> User:
     except DuplicateKeyError as e:
         raise UserAlreadyExists(payload.email)
 
+async def list_users() -> List[User]:
+    db = MongoConnection.get_client()
+    db_collection = db.users
 
-async def get_user_by_email(email: str) -> Optional[User]:
-    return await User.find_one(User.email == email)
+    query_result = db_collection.find({'is_active': True})
 
-async def list_users(limit: int = 50, skip: int = 0) -> List[User]:
-    return await User.find().skip(skip).limit(limit).to_list()
+    users = [User(**doc) for doc in list(query_result)]
+    
+    return users

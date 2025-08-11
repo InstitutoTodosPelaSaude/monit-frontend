@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Query, status
 from app.schemas.users import UserCreate, UserOut
-from app.crud.users import create_user, get_user_by_email, list_users
+from app.crud.users import create_user, list_users
 
 from app.crud.exceptions import UserAlreadyExists
 
@@ -26,6 +26,6 @@ async def create_user_route(payload: UserCreate):
     return UserOut(email=payload.email, name=payload.name)
 
 @router.get("", response_model=list[UserOut], summary="Lista usuários")
-async def list_users_route(limit: int = Query(50, le=200), skip: int = 0):
-    docs = await list_users(limit=limit, skip=skip)
+async def list_users_route():
+    docs = await list_users()
     return [UserOut(id=str(d.id), email=d.email, name=d.name, is_active=d.is_active) for d in docs]
