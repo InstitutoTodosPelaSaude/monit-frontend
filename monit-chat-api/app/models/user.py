@@ -35,6 +35,7 @@ class User(BaseModel):
         dict_repr = dict(self)
         dict_repr['_id'] = dict_repr['id']
         del dict_repr['id']
+        dict_repr["type"] = "USER"
         return dict_repr
 
 if __name__ == "__main__":

@@ -4,7 +4,7 @@ from app.crud.users import create_user, list_users
 
 from app.crud.exceptions import UserAlreadyExists
 
-router = APIRouter(prefix="/users", tags=["users"])
+router = APIRouter(prefix="/user", tags=["users"])
 
 @router.post("", response_model=UserOut, status_code=201, summary="Cria usuário")
 async def create_user_route(payload: UserCreate):
