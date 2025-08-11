@@ -4,6 +4,8 @@ from app.crud.database import MongoConnection
 from app.crud.exceptions import ChatIDNotFound
 from app.crud.users import read_user_by_id
 
+from app.crud.query import generate_sql_query_to_answer_question
+
 from datetime import datetime
 import hashlib
 
@@ -26,9 +28,9 @@ async def create_bot_reply_message(chat_id: str, user_message: str) -> ChatBotMe
 
     # [WIP] Create AI response logic
     message = user_message
-    sql_generated = "SELECT * FROM TESTE"
+    generated_query = generate_sql_query_to_answer_question(message)
     
-    new_msg = ChatBotMessage(message=user_message, sql_generated=sql_generated)
+    new_msg = ChatBotMessage(message=user_message, generated_query=generated_query)
     db_collection.update_one(
         {"_id": chat_id},
         {"$push": {"messages": new_msg.model_dump()}}

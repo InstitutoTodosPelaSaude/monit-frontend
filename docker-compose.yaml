@@ -19,10 +19,8 @@ services:
     build:
       context: .
       dockerfile: monit-chat-api/Dockerfile
-    environment:
-      MONGO_URI: ${MONGO_URI}
-      MONGO_DB: ${MONGO_DB}
-      APP_ENV: ${APP_ENV}
+    env_file:
+      - .env
     ports:
       - "${APP_PORT}:8000"
     volumes:

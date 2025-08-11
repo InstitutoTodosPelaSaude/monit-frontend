@@ -4,6 +4,7 @@ from typing import Tuple, Any
 import hashlib
 import secrets
 
+from app.crud.query import SQLGeneratedResponse
 
 class Chat(BaseModel):
 
@@ -34,7 +35,7 @@ class UserMessage(BaseModel):
 class ChatBotMessage(BaseModel):
     message: str
 
-    sql_generated: str
+    generated_query: SQLGeneratedResponse
 
     author: str = "BOT"
     type: str = "MESSAGE"
