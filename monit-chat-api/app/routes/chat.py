@@ -1,10 +1,10 @@
 from fastapi import APIRouter, HTTPException, Query, status
 from app.schemas.chat import TableCreate
-from app.crud.chat import create_chat, create_user_message, read_chat_by_id, create_table
+from app.crud.chat import create_chat, create_user_message, read_chat_by_id, create_table, list_tables
 
 from app.crud.exceptions import UserIDNotFound, ChatIDNotFound, TableAlreadyExists
 
-router = APIRouter(prefix="/chat", tags=["users"])
+router = APIRouter(prefix="/chat")
 
 @router.post("", summary="Cria um chat para um usuário", status_code=status.HTTP_201_CREATED)
 async def create_chat_route(
@@ -65,3 +65,8 @@ async def create_table_route(payload: TableCreate):
             status_code=status.HTTP_409_CONFLICT,
             detail=str(e)
         )
+    
+@router.get("/table/", summary="Lista todas as tabelas cadastradas")
+async def list_tables_route():
+    docs = await list_tables()
+    return docs

@@ -80,3 +80,10 @@ async def create_table(payload: TableCreate) -> Table:
         raise TableAlreadyExists(payload.name)
 
     return new_table
+
+async def list_tables() -> list[Table]:
+    db = MongoConnection.get_client()
+    db_collection = db.chat
+
+    docs = db_collection.find({'type': 'TABLE'})
+    return [Table(**doc) for doc in docs]

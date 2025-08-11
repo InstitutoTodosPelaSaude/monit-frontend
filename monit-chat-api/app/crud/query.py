@@ -28,17 +28,14 @@ def select_tables_that_can_answer_this_question(question):
 
     tables = list(
         db_collection
-        .find(
-            {'type': 'TABLE'},
-            {'name':1, 'description': 1}
-        )
+        .find({'type': 'TABLE'})
     )
 
     tables_prompt = "\n".join( [ f"Name: {table['name']} Description: {table['description']}" for table in tables ] )
     tables_prompt = f"\n{tables_prompt}"
 
     response = client.responses.parse(
-        model="gpt-4o",
+        model="gpt-4o-mini",
         input=[
             {
                 "role": "system", 
@@ -62,14 +59,13 @@ def select_tables_that_can_answer_this_question(question):
 def generate_sql_query_to_answer_question(question):
 
     selected_tables = select_tables_that_can_answer_this_question(question)
-    print(selected_tables)
     if not selected_tables:
         return SQLGeneratedResponse()
 
     response = client.responses.parse(
-        model="gpt-4o",
+        model="gpt-4o-mini",
         input=[
-            {"role": "system", "content": "Respond this SQL question. If it is not a valid question, mark is_a_valid_sql_question with false."},
+            {"role": "system", "content": "Based on the table's descriptions, respond this SQL question. If it is not a valid question, mark is_a_valid_sql_question with false."},
             {
                 "role": "user",
                 "content": question,
