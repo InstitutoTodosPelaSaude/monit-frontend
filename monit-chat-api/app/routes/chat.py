@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Query, status
 from app.schemas.users import UserCreate, UserOut
-from app.crud.chat import create_chat, create_user_message
+from app.crud.chat import create_chat, create_user_message, read_chat_by_id
 
 from app.crud.exceptions import UserAlreadyExists, UserIDNotFound, ChatIDNotFound
 
@@ -43,3 +43,14 @@ async def create_chat_message_route(
         )
     
     return message
+
+@router.get("/{chat_id}", summary="Busca um chat por ID")
+async def get_chat_route(chat_id: str):
+    try:
+        chat = await read_chat_by_id(chat_id)
+        return chat
+    except ChatIDNotFound as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e)
+        )
