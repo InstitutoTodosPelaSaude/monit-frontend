@@ -1,4 +1,4 @@
-from app.models.chat import Chat, UserMessage
+from app.models.chat import Chat, UserMessage, ChatBotMessage
 
 from app.crud.database import MongoConnection
 from app.crud.exceptions import ChatIDNotFound
@@ -18,6 +18,24 @@ async def create_chat(user_id, name="<chat>"):
 
     return new_chat
 
+async def create_bot_reply_message(chat_id: str, user_message: str) -> ChatBotMessage:
+    db = MongoConnection.get_client()
+    db_collection = db.chat
+
+    chat = await read_chat_by_id(chat_id)
+
+    # [WIP] Create AI response logic
+    message = user_message
+    sql_generated = "SELECT * FROM TESTE"
+    
+    new_msg = ChatBotMessage(message=user_message, sql_generated=sql_generated)
+    db_collection.update_one(
+        {"_id": chat_id},
+        {"$push": {"messages": new_msg.model_dump()}}
+    )
+
+    return new_msg
+
 async def create_user_message(chat_id, message="<message>"):
     db = MongoConnection.get_client()
     db_collection = db.chat
@@ -30,6 +48,8 @@ async def create_user_message(chat_id, message="<message>"):
         {"_id": chat_id},
         {"$push": {"messages": new_msg.dict()}}
     )
+
+    await create_bot_reply_message(chat_id, message)
 
     return new_msg.dict()
 

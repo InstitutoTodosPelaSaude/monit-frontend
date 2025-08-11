@@ -30,3 +30,12 @@ class UserMessage(BaseModel):
     author: str = "USER"
     type: str = "MESSAGE"
     created_at: datetime = Field(default_factory=datetime.now)
+
+class ChatBotMessage(BaseModel):
+    message: str
+
+    sql_generated: str
+
+    author: str = "BOT"
+    type: str = "MESSAGE"
+    created_at: datetime = Field(default_factory=datetime.now)
