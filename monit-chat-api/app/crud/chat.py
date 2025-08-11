@@ -1,10 +1,13 @@
-from app.models.chat import Chat, UserMessage, ChatBotMessage
+from app.models.chat import Chat, UserMessage, ChatBotMessage, Table
 
 from app.crud.database import MongoConnection
-from app.crud.exceptions import ChatIDNotFound
+from app.crud.exceptions import ChatIDNotFound, TableAlreadyExists
 from app.crud.users import read_user_by_id
-
 from app.crud.query import generate_sql_query_to_answer_question
+
+from app.schemas.chat import TableColumnCreate, TableCreate, TableMetadataCreate
+
+from pymongo.errors import DuplicateKeyError
 
 from datetime import datetime
 import hashlib
@@ -64,3 +67,16 @@ async def read_chat_by_id(chat_id):
         return Chat(**chat_data)
     
     raise ChatIDNotFound(chat_id)
+
+async def create_table(payload: TableCreate) -> Table:
+    db = MongoConnection.get_client()
+    db_collection = db.chat
+
+    new_table = Table(**payload.model_dump())
+
+    try:
+        db_collection.insert_one(new_table.dict())
+    except DuplicateKeyError as e:
+        raise TableAlreadyExists(payload.name)
+
+    return new_table

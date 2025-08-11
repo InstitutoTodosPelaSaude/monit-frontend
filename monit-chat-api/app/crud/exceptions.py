@@ -12,3 +12,9 @@ class ChatIDNotFound(Exception):
     def __init__(self, id: str):
         message = f"Chat com ID='{id}' não encontrado."
         super().__init__(message)
+
+class TableAlreadyExists(Exception):
+    def __init__(self, table: str):
+        message = f"Tabela com nome='{table}' já existe."
+        super().__init__(message)
+    
