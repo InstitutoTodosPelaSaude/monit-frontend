@@ -10,6 +10,7 @@ from app.models.chat import Table, ChatBotMessage
 
 from app.crud.chat import read_chat_by_id, create_bot_reply_message, list_tables
 import json
+import sqlparse
 
 client = OpenAI()
 
@@ -80,11 +81,33 @@ def postprocess_sql_query(query, tables: list[Table], max_num_lines = 1000):
         )
 
     # Apply limit
+    postprocessed_query = postprocessed_query.replace(';', '')
     postprocessed_query = f'SELECT * FROM ({postprocessed_query}) AS query_limit_num_of_lines LIMIT {max_num_lines}'
+
+    # Ident Query
+    postprocessed_query = sqlparse.format(postprocessed_query, reindent=True, keyword_case='upper')
+
     return postprocessed_query
 
 def check_if_query_is_read_only(query):
-    # [WIP] Read only query with sqlparse
+    all_sql_queries_tokenized = sqlparse.parse(query)
+
+    if len(all_sql_queries_tokenized) != 1:
+        # If there are more than two or any SQL statements 
+        return False
+
+    forbidden_commands = {
+        "INSERT", "UPDATE", "SET", "DELETE", "MERGE", "UPSERT", "REPLACE", # DML
+        "CREATE", "DROP", "ALTER", "TRUNCATE", "RENAME", # DDL
+        "EXEC", "EXECUTE", "CALL"
+    }
+
+    sql_tokenized = all_sql_queries_tokenized[0]
+    for token in sql_tokenized.tokens:
+        if token.value in forbidden_commands:
+            if str(token.ttype).startswith("Token.Keyword"):
+                return False
+            
     return True
 
 async def trigger_chatbot_response_flow(
