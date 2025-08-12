@@ -37,14 +37,13 @@ async def create_chat_message_route(
     
     try:
         message = await create_user_message(chat_id, message)
-        await trigger_chatbot_response_flow(chat_id, message)
+        await trigger_chatbot_response_flow(chat_id)
     except ChatIDNotFound as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=str(e)
         )
         
-    
     return message
 
 @router.get("/{chat_id}", summary="Busca um chat por ID")

@@ -40,9 +40,14 @@ async def select_tables_to_answer_question(chat_history) -> list[Table]:
         if table.name in response.output_parsed.tables
     ]
 
+    print(response.output_parsed.tables)
+    
     return selected_tables
 
 def generate_sql_query_to_answer_question(chat_history, tables: list[Table]):
+
+    if not tables:
+        return SQLGeneratedResponse()
     
     tables = [ table.json_data_dictionary for table in tables ]
     response = client.responses.parse(
@@ -63,10 +68,27 @@ def generate_sql_query_to_answer_question(chat_history, tables: list[Table]):
     )
 
     return response.output_parsed
-    
+
+def postprocess_sql_query(query, tables: list[Table], max_num_lines = 1000):
+
+    # Replace the table PROMPT names with the real table names
+    postprocessed_query = query
+    for table in tables:
+        postprocessed_query = postprocessed_query.replace(
+            table.name,
+            f'"{table.metadata.database}"."{table.metadata.schema}"."{table.metadata.name}"'
+        )
+
+    # Apply limit
+    postprocessed_query = f'SELECT * FROM ({postprocessed_query}) AS query_limit_num_of_lines LIMIT {max_num_lines}'
+    return postprocessed_query
+
+def check_if_query_is_read_only(query):
+    # [WIP] Read only query with sqlparse
+    return True
+
 async def trigger_chatbot_response_flow(
-    chat_id,
-    user_question
+    chat_id
 ):
     
     chat = await read_chat_by_id(chat_id)
@@ -75,5 +97,30 @@ async def trigger_chatbot_response_flow(
     tables = await select_tables_to_answer_question(chat_history)
     generated_query = generate_sql_query_to_answer_question(chat_history, tables)
 
-    new_message = ChatBotMessage(generated_query=generated_query, message=generated_query.query)
+    if not generated_query.is_a_valid_sql_question:
+        new_message = ChatBotMessage(
+            generated_query=generated_query, 
+            message="Unable to found tables in the database that can answer this request.", 
+        )
+        await create_bot_reply_message(chat_id, new_message)
+        return 
+    
+    if not check_if_query_is_read_only(generated_query.query):
+        new_message = ChatBotMessage(
+            generated_query=generated_query, 
+            message="Ops! Request denied, I can only READ from tables.", 
+        )
+        await create_bot_reply_message(chat_id, new_message)
+        return 
+
+
+    postprocessed_query = postprocess_sql_query(generated_query.query, tables)
+    new_message = ChatBotMessage(
+        generated_query=generated_query, 
+        postprocessed_query=postprocessed_query,
+        tables_used_in_query=tables,
+        message="Request processed, see the results...", 
+    )
+
     await create_bot_reply_message(chat_id, new_message)
+    
