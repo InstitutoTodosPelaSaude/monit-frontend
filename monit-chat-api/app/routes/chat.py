@@ -3,6 +3,7 @@ from app.schemas.chat import TableCreate
 from app.crud.chat import create_chat, create_user_message, read_chat_by_id, create_table, list_tables
 
 from app.crud.exceptions import UserIDNotFound, ChatIDNotFound, TableAlreadyExists
+from app.services.chat_flow import trigger_chatbot_response_flow
 
 router = APIRouter(prefix="/chat")
 
@@ -36,11 +37,13 @@ async def create_chat_message_route(
     
     try:
         message = await create_user_message(chat_id, message)
+        await trigger_chatbot_response_flow(chat_id, message)
     except ChatIDNotFound as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=str(e)
         )
+        
     
     return message
 

@@ -6,26 +6,6 @@ import secrets
 
 from app.models.query import SQLGeneratedResponse
 
-class Chat(BaseModel):
-
-    id: str | None = Field(default=None, serialization_alias="_id")
-    user_id: str
-    name: str
-    messages: list[Any] = Field(default_factory=list)
-    type: Literal["CHAT"] = "CHAT"
-
-    @model_validator(mode='after')
-    def create_id(self):
-        self.id = hashlib.sha256(datetime.now().isoformat().encode()).hexdigest()
-        return self
-    
-    @model_serializer
-    def serialize_model(self) -> dict[str, Any]:
-        dict_repr = dict(self)
-        dict_repr['_id'] = dict_repr['id']
-        del dict_repr['id']
-        return dict_repr
-
 class UserMessage(BaseModel):
     message: str
     author: str = "USER"
@@ -40,6 +20,37 @@ class ChatBotMessage(BaseModel):
 
     generated_query: SQLGeneratedResponse
 
+class Chat(BaseModel):
+
+    id: str | None = Field(default=None, serialization_alias="_id")
+    user_id: str
+    name: str
+    messages: list[UserMessage | ChatBotMessage] = Field(default_factory=list)
+    type: Literal["CHAT"] = "CHAT"
+
+    @model_validator(mode='after')
+    def create_id(self):
+        self.id = hashlib.sha256(datetime.now().isoformat().encode()).hexdigest()
+        return self
+    
+    @model_serializer
+    def serialize_model(self) -> dict[str, Any]:
+        dict_repr = dict(self)
+        dict_repr['_id'] = dict_repr['id']
+        del dict_repr['id']
+        return dict_repr
+    
+    def format_to_openai_chat_completion_input(self):
+
+        return [
+            {
+                'role': 'assistant' if message.author == 'BOT' else 'user' , 
+                'content': message.message
+            }
+            for message 
+            in self.messages
+        ]
+
 # =======================
 # TABLE MODELS
 # =======================
@@ -49,7 +60,7 @@ class TableColumn(BaseModel):
     type: str
     description: str
 
-class TableMetadata(BaseModel):
+class TableDatabaseMetadata(BaseModel):
     name: str
     schema: str
     database: str
@@ -63,7 +74,7 @@ class Table(BaseModel):
     observations: list[str]
     type: Literal["TABLE"] = "TABLE"
 
-    metadata: TableMetadata
+    metadata: TableDatabaseMetadata
 
     @model_validator(mode='after')
     def create_id(self):
@@ -76,3 +87,9 @@ class Table(BaseModel):
         dict_repr['_id'] = dict_repr['id']
         del dict_repr['id']
         return dict_repr
+    
+    @property
+    def json_data_dictionary(self):
+        data = self.dict()
+        del data['metadata']
+        return data

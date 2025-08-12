@@ -49,8 +49,6 @@ async def create_user_message(chat_id, message="<message>"):
         {"$push": {"messages": new_msg.dict()}}
     )
 
-    await create_bot_reply_message(chat_id, message)
-
     return new_msg.dict()
 
 async def read_chat_by_id(chat_id):
