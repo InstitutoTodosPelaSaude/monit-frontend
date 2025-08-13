@@ -77,7 +77,7 @@ async def update_chat_name(chat_id: str, new_name: str):
         return Chat(**chat)
 
     updated_chat = await read_chat_by_id(chat_id)
-    return Chat(**updated_chat)
+    return updated_chat
 
 async def create_table(payload: TableCreate) -> Table:
     db = MongoConnection.get_client()
