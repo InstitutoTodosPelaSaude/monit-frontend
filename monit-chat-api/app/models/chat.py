@@ -4,7 +4,7 @@ from typing import Tuple, Any, Literal
 import hashlib
 import secrets
 
-from app.models.query import SQLGeneratedResponse
+from app.models.query import SQLGeneratedResponse, SQLQuery
 
 # =======================
 # TABLE MODELS
@@ -63,7 +63,7 @@ class ChatBotMessage(BaseModel):
     type: Literal["MESSAGE"] = "MESSAGE"
     created_at: datetime = Field(default_factory=datetime.now)
 
-    generated_query: SQLGeneratedResponse
+    generated_query: SQLQuery
     tables_used_in_query: list[Table] | None = None
     postprocessed_query: str | None = None
 

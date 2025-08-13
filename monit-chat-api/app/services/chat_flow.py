@@ -5,10 +5,12 @@ from app.crud.database import MongoConnection
 
 from openai import OpenAI
     
-from app.models.query import SQLGeneratedResponse, SQLTableSelectionResponse, GenereateNameForChatResponse
+from app.models.query import SQLGeneratedResponse, SQLTableSelectionResponse, GenereateNameForChatResponse, SQLQuery
 from app.models.chat import Table, ChatBotMessage, Chat, NEW_CHAT_DEFAULT_NAME
 
 from app.crud.chat import read_chat_by_id, create_bot_reply_message, list_tables, update_chat_name
+from app.crud.query import create_sql_query
+
 import json
 import sqlparse
 
@@ -68,7 +70,8 @@ def generate_sql_query_to_answer_question(chat_history, tables: list[Table]):
         text_format=SQLGeneratedResponse
     )
 
-    return response.output_parsed
+    sql_generated_response = response.output_parsed
+    return SQLQuery(query=sql_generated_response.query), sql_generated_response.is_a_valid_sql_question
 
 def postprocess_sql_query(query, tables: list[Table], max_num_lines = 1000):
 
@@ -139,9 +142,9 @@ async def trigger_chatbot_response_flow(
     chat_history = chat.format_to_openai_chat_completion_input()
 
     tables = await select_tables_to_answer_question(chat_history)
-    generated_query = generate_sql_query_to_answer_question(chat_history, tables)
+    generated_query, is_a_valid_sql_question = generate_sql_query_to_answer_question(chat_history, tables)
 
-    if not generated_query.is_a_valid_sql_question:
+    if not is_a_valid_sql_question:
         new_message = ChatBotMessage(
             generated_query=generated_query, 
             message="Unable to found tables in the database that can answer this request.", 
@@ -168,4 +171,5 @@ async def trigger_chatbot_response_flow(
     )
 
     await create_bot_reply_message(chat_id, new_message)
+    await create_sql_query(generated_query)
     
