@@ -1,5 +1,5 @@
 from datetime import datetime
-from pydantic import BaseModel, Field, EmailStr, field_validator, model_validator, model_serializer
+from pydantic import BaseModel, Field, EmailStr, field_validator, model_validator, model_serializer, AliasChoices
 from typing import Tuple, Any, Literal
 import hashlib
 import secrets
@@ -9,6 +9,8 @@ from app.models.query import SQLGeneratedResponse
 # =======================
 # TABLE MODELS
 # =======================
+
+NEW_CHAT_DEFAULT_NAME = "NEW-CHAT"
 
 class TableColumn(BaseModel):
     name: str
@@ -67,15 +69,16 @@ class ChatBotMessage(BaseModel):
 
 class Chat(BaseModel):
 
-    id: str | None = Field(default=None, serialization_alias="_id")
+    id: str | None = Field(default=None, serialization_alias="_id", validation_alias=AliasChoices('id', '_id'))
     user_id: str
-    name: str
+    name: str = Field(default=NEW_CHAT_DEFAULT_NAME)
     messages: list[UserMessage | ChatBotMessage] = Field(default_factory=list)
     type: Literal["CHAT"] = "CHAT"
 
     @model_validator(mode='after')
     def create_id(self):
-        self.id = hashlib.sha256(datetime.now().isoformat().encode()).hexdigest()
+        if not self.id:
+            self.id = hashlib.sha256(datetime.now().isoformat().encode()).hexdigest()
         return self
     
     @model_serializer

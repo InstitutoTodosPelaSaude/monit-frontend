@@ -5,10 +5,10 @@ from app.crud.database import MongoConnection
 
 from openai import OpenAI
     
-from app.models.query import SQLGeneratedResponse, SQLTableSelectionResponse
-from app.models.chat import Table, ChatBotMessage
+from app.models.query import SQLGeneratedResponse, SQLTableSelectionResponse, GenereateNameForChatResponse
+from app.models.chat import Table, ChatBotMessage, Chat, NEW_CHAT_DEFAULT_NAME
 
-from app.crud.chat import read_chat_by_id, create_bot_reply_message, list_tables
+from app.crud.chat import read_chat_by_id, create_bot_reply_message, list_tables, update_chat_name
 import json
 import sqlparse
 
@@ -110,6 +110,27 @@ def check_if_query_is_read_only(query):
             
     return True
 
+async def create_new_chat_name(chat_id: str):
+
+    chat = await read_chat_by_id(chat_id)
+    if chat.name != NEW_CHAT_DEFAULT_NAME:
+        return
+    
+    response = client.responses.parse(
+        model="gpt-4o-mini",
+        input=[
+            {
+                "role": "system", 
+                "content": "Give a short name to this chat based on the user's question."
+            },
+            *chat.format_to_openai_chat_completion_input()
+        ],
+        text_format=GenereateNameForChatResponse
+    )
+
+    new_name = response.output_parsed.name
+    await update_chat_name(chat.id, new_name)
+
 async def trigger_chatbot_response_flow(
     chat_id
 ):
@@ -136,6 +157,7 @@ async def trigger_chatbot_response_flow(
         await create_bot_reply_message(chat_id, new_message)
         return 
 
+    await create_new_chat_name(chat_id)
 
     postprocessed_query = postprocess_sql_query(generated_query.query, tables)
     new_message = ChatBotMessage(

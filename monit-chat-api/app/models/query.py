@@ -1,5 +1,8 @@
 from pydantic import BaseModel, model_validator
 
+class GenereateNameForChatResponse(BaseModel):
+    name: str
+
 class SQLTableSelectionResponse(BaseModel):
     tables: list[str]
 

@@ -1,4 +1,7 @@
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, HTTPException, Query, status, Depends
+from fastapi.security import OAuth2PasswordBearer
+from typing import Annotated
+
 from app.schemas.chat import TableCreate
 from app.crud.chat import create_chat, create_user_message, read_chat_by_id, create_table, list_tables
 
@@ -6,6 +9,11 @@ from app.crud.exceptions import UserIDNotFound, ChatIDNotFound, TableAlreadyExis
 from app.services.chat_flow import trigger_chatbot_response_flow
 
 router = APIRouter(prefix="/chat")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+@router.get("/test")
+def test(token: Annotated[str, Depends(oauth2_scheme)]):
+    return {"token": token}
 
 @router.post("", summary="Cria um chat para um usuário", status_code=status.HTTP_201_CREATED)
 async def create_chat_route(
