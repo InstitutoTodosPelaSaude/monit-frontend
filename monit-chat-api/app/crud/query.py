@@ -16,17 +16,19 @@ async def read_query_by_id(query_id: str) -> SQLQuery:
     db = MongoConnection.get_client()
     db_collection = db.chat
 
-    query = SQLQuery(
-        **db_collection.find_one(
-            {
-                "_id": query_id,
-                "type": "QUERY"
-            },
-        )
+    query_result = db_collection.find_one(
+        {
+            "_id": query_id,
+            "type": "QUERY"
+        },
     )
 
-    if not query:
+    if not query_result:
         raise QueryIDNotFound(query_id)
+    
+    query = SQLQuery(
+        **query_result
+    )
 
     return query
 
