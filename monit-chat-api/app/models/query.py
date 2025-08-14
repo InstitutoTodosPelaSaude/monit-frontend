@@ -20,7 +20,18 @@ class SQLGeneratedResponse(BaseModel):
         if not self.is_a_valid_sql_question:
            self.query = "<INVALID>" 
         return self
-    
+
+class QueryResult(BaseModel):
+
+    id: str = Field(
+        default_factory=lambda: hashlib.sha256(datetime.now().isoformat().encode()).hexdigest(), 
+        validation_alias=AliasChoices('id', '_id')
+    )
+    query_id: str
+    last_executed_at: datetime = Field(default_factory=datetime.now)
+    data: list[Any]
+    columns: list[str]
+
 class SQLQuery(BaseModel):
     id: str = Field(
         default_factory=lambda: hashlib.sha256(datetime.now().isoformat().encode()).hexdigest(), 
@@ -28,6 +39,7 @@ class SQLQuery(BaseModel):
     )
     query: str
     type: Literal["QUERY"] = "QUERY"
+    query_result: QueryResult | None = None
 
     @model_serializer
     def serialize_model(self) -> dict[str, Any]:
