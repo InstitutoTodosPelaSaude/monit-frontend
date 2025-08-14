@@ -2,7 +2,9 @@ from fastapi import APIRouter, HTTPException, Query, status, Depends
 from typing import Annotated
 
 from app.schemas.chat import TableCreate
+from app.models.user import User
 from app.crud.chat import create_chat, create_user_message, read_chat_by_id, create_table, list_tables
+from app.crud.users import get_current_user_from_jwt_token
 
 from app.crud.exceptions import UserIDNotFound, ChatIDNotFound, TableAlreadyExists
 from app.services.chat_flow import trigger_chatbot_response_flow
@@ -11,6 +13,7 @@ router = APIRouter(prefix="/chat")
 
 @router.post("", summary="Cria um chat para um usuário", status_code=status.HTTP_201_CREATED)
 async def create_chat_route(
+    current_user: Annotated[User, Depends(get_current_user_from_jwt_token)],
     user_id: str = Query(..., description="ID do usuário para associar ao chat")
 ):
     """
@@ -33,6 +36,7 @@ async def create_chat_route(
 
 @router.post("/message", summary="Cria uma mensagem em um chat", status_code=status.HTTP_201_CREATED)
 async def create_chat_message_route(
+    current_user: Annotated[User, Depends(get_current_user_from_jwt_token)],
     chat_id: str = Query(..., description="ID do usuário para associar ao chat"),
     message: str = Query(..., description="Mensagem"),
 ):
@@ -49,7 +53,10 @@ async def create_chat_message_route(
     return message
 
 @router.get("/{chat_id}", summary="Busca um chat por ID")
-async def get_chat_route(chat_id: str):
+async def get_chat_route(
+    current_user: Annotated[User, Depends(get_current_user_from_jwt_token)],
+    chat_id: str
+):
     try:
         chat = await read_chat_by_id(chat_id)
         return chat
@@ -60,7 +67,10 @@ async def get_chat_route(chat_id: str):
         )
     
 @router.post("/table", status_code=status.HTTP_201_CREATED, summary="Cria uma nova tabela")
-async def create_table_route(payload: TableCreate):
+async def create_table_route(
+    current_user: Annotated[User, Depends(get_current_user_from_jwt_token)],
+    payload: TableCreate
+):
     try:
         table = await create_table(payload)
         return table
