@@ -14,20 +14,10 @@ class User(BaseModel):
     updated_at: datetime = Field(default_factory=datetime.now)
 
     password: str
-    password_salt: str | None = None
 
     @model_validator(mode='after')
     def create_id(self):
         self.id = self.email
-        return self
-
-    @model_validator(mode='after')
-    def encrypt_password(self):
-        salt = secrets.token_hex(16)
-        hash_ = hashlib.sha256((self.password + salt).encode()).hexdigest()
-
-        self.password_salt = salt
-        self.password = hash_
         return self
 
     @model_serializer

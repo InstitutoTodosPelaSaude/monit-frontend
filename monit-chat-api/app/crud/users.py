@@ -4,15 +4,52 @@ from app.models.chat import Chat
 from app.schemas.users import UserCreate
 
 from app.crud.database import MongoConnection
-from app.crud.exceptions import UserAlreadyExists, UserIDNotFound
+from app.crud.exceptions import (
+    UserAlreadyExists, 
+    UserIDNotFound, 
+    UserIDNotFoundOrInvalidPassword
+)
 
 from datetime import datetime
-import hashlib
+import bcrypt
 
 from pymongo.errors import DuplicateKeyError
 
+async def authenticate_user(username, password) -> User:
+    db = MongoConnection.get_client()
+    db_collection = db.users
+
+    user = User(
+        **db_collection
+        .find_one(
+            {
+                'is_active': True, 
+                'type': 'USER',
+                '_id': username
+            }
+        )
+    )
+    
+
+    if not user:
+        raise UserIDNotFound(username)
+    
+    if not bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
+        raise UserIDNotFoundOrInvalidPassword(username)
+    
+    return user
+
 async def create_user(payload: UserCreate) -> User:
-    new_user = User(email=payload.email, name=payload.name, password=payload.password)
+    
+    # Generate hashed password and salt
+    salt = bcrypt.gensalt()
+    hashed_password = bcrypt.hashpw(payload.password.encode('utf-8'), salt).decode('utf-8')
+
+    new_user = User(
+        email=payload.email, 
+        name=payload.name, 
+        password=hashed_password
+    )
 
     db = MongoConnection.get_client()
     db_collection = db.users

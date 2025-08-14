@@ -11,10 +11,6 @@ from app.services.chat_flow import trigger_chatbot_response_flow
 router = APIRouter(prefix="/chat")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-@router.get("/test")
-def test(token: Annotated[str, Depends(oauth2_scheme)]):
-    return {"token": token}
-
 @router.post("", summary="Cria um chat para um usuário", status_code=status.HTTP_201_CREATED)
 async def create_chat_route(
     user_id: str = Query(..., description="ID do usuário para associar ao chat")
