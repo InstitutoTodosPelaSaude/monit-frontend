@@ -9,3 +9,7 @@ class UserOut(BaseModel):
     email: EmailStr
     name: str | None
     is_active: bool = True
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
