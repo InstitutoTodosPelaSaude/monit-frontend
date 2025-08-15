@@ -10,6 +10,8 @@ from app.models.chat import Table, ChatBotMessage, Chat, NEW_CHAT_DEFAULT_NAME
 
 from app.crud.chat import read_chat_by_id, create_bot_reply_message, list_tables, update_chat_name
 from app.crud.query import create_sql_query
+from app.services.query_utils import postprocess_sql_query, check_if_query_is_read_only
+from app.services.query_execution import trigger_query_execution_flow
 
 import json
 import sqlparse
@@ -74,54 +76,6 @@ def generate_sql_query_to_answer_question(chat_history, tables: list[Table]):
     sql_generated_response = response.output_parsed
     return SQLQuery(query=sql_generated_response.query), sql_generated_response.is_a_valid_sql_question
 
-def postprocess_sql_query(query, tables: list[Table], max_num_lines = 1000):
-
-    # Replace the table PROMPT names with the real table names
-    postprocessed_query = query
-    for table in tables:
-
-        # Try to replace column name double quoted ""
-        postprocessed_query = postprocessed_query.replace(
-            f'"{table.name}"',
-            table.name,
-        )
-
-        # Replace the column 
-        postprocessed_query = postprocessed_query.replace(
-            f'{table.name}',
-            f'"{table.metadata.database}"."{table.metadata.schema}"."{table.metadata.name}"'
-        )
-
-    # Apply limit
-    postprocessed_query = postprocessed_query.replace(';', '')
-    postprocessed_query = f'SELECT * FROM ({postprocessed_query}) AS query_limit_num_of_lines LIMIT {max_num_lines}'
-
-    # Ident Query
-    postprocessed_query = sqlparse.format(postprocessed_query, reindent=True, keyword_case='upper')
-
-    return postprocessed_query
-
-def check_if_query_is_read_only(query):
-    all_sql_queries_tokenized = sqlparse.parse(query)
-
-    if len(all_sql_queries_tokenized) != 1:
-        # If there are more than two or any SQL statements 
-        return False
-
-    forbidden_commands = {
-        "INSERT", "UPDATE", "SET", "DELETE", "MERGE", "UPSERT", "REPLACE", # DML
-        "CREATE", "DROP", "ALTER", "TRUNCATE", "RENAME", # DDL
-        "EXEC", "EXECUTE", "CALL"
-    }
-
-    sql_tokenized = all_sql_queries_tokenized[0]
-    for token in sql_tokenized.tokens:
-        if token.value in forbidden_commands:
-            if str(token.ttype).startswith("Token.Keyword"):
-                return False
-            
-    return True
-
 async def create_new_chat_name(chat_id: str):
 
     chat = await read_chat_by_id(chat_id)
@@ -181,4 +135,8 @@ async def trigger_chatbot_response_flow(
 
     await create_bot_reply_message(chat_id, new_message)
     await create_sql_query(generated_query)
-    
+
+    try:
+        await trigger_query_execution_flow(generated_query.id)
+    except Exception as e:
+        pass

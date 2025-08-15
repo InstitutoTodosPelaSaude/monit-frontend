@@ -2,7 +2,7 @@ from app.crud.query import read_query_by_id, update_query_result
 from app.models.query import SQLQuery, QueryResult
 from app.schemas.query import QueryUpdateResult
 from app.crud.chat import list_tables
-from app.services.chat_flow import postprocess_sql_query, check_if_query_is_read_only
+from app.services.query_utils import postprocess_sql_query, check_if_query_is_read_only
 from app.crud.exceptions import QueryCannotBeExecuted
 
 from app.crud.database import PostgresConnection

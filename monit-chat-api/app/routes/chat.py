@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Query, status, Depends
+from fastapi import APIRouter, HTTPException, Query, status, Depends, Query
 from typing import Annotated
 
 from app.schemas.chat import TableCreate
@@ -92,10 +92,12 @@ async def list_tables_route():
 @router.get("/query/result", summary="Executa uma consulta e recupera os dados dela.")
 async def get_data_from_query(
     current_user: Annotated[User, Depends(get_current_user_from_jwt_token)],
-    query_id: str
+    query_id: str,
+    execute_query: bool = Query(True)
 ):
     try:
-        await trigger_query_execution_flow(query_id)
+        if execute_query:
+            await trigger_query_execution_flow(query_id)
         query = await read_query_by_id(query_id)
         return query
     except QueryIDNotFound as e:
