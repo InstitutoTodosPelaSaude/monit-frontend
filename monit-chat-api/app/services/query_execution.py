@@ -5,13 +5,20 @@ from app.crud.chat import list_tables
 from app.services.chat_flow import postprocess_sql_query, check_if_query_is_read_only
 from app.crud.exceptions import QueryCannotBeExecuted
 
+from app.crud.database import PostgresConnection
+from pprint import pprint
+
 async def execute_query(sql_query: str, query_id: str) -> QueryResult:
 
-    # [WIP] Query execution in the real database
+    columns, result = PostgresConnection().execute_query(sql_query)
+
+    if not columns or not result:
+        raise QueryCannotBeExecuted(query_id=query_id, reason="Problema executando consulta")
+
     query_result = QueryResult(
         query_id=query_id,
-        data=[(1,2,3,4,5), (1,2,3,4,5)],
-        columns=["c1","c2","c3","c4","c5"]
+        data=result,
+        columns=columns
     )
 
     return query_result
@@ -22,7 +29,7 @@ async def trigger_query_execution_flow(
     query = await read_query_by_id(query_id)
     generated_query = query.query
     if not check_if_query_is_read_only(generated_query):
-        raise QueryCannotBeExecuted("A Query precisa ser somente-leitura.")
+        raise QueryCannotBeExecuted(query_id=query_id, reason="A Query precisa ser somente-leitura.")
     
     tables = await list_tables()
     postprocessed_query = postprocess_sql_query(generated_query, tables)

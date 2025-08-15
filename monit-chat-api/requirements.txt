@@ -10,3 +10,4 @@ openai
 sqlparse==0.5.3
 bcrypt
 PyJWT
+psycopg2-binary

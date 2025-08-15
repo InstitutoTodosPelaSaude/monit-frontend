@@ -29,6 +29,6 @@ class QueryIDNotFound(Exception):
         super().__init__(message)
 
 class QueryCannotBeExecuted(Exception):
-    def __init__(self, reason: str):
-        message = f"Query com ID='{id}' não pôde ser executada - {reason}."
+    def __init__(self, query_id, reason: str):
+        message = f"Query com ID='{query_id}' não pôde ser executada - {reason}."
         super().__init__(message)

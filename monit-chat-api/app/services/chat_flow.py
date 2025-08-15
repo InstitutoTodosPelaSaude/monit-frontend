@@ -62,6 +62,7 @@ def generate_sql_query_to_answer_question(chat_history, tables: list[Table]):
                     Your purpose is to write SQL queries to respond user questions. 
                     Based on the data dictionary provided and the chat history, create a new SQL query to respond the user's request. 
                     If the user doesn't make valid question, mark is_a_valid_sql_question with false.
+                    Always double-quote thecolumns used.
                     Data dictonary: {json.dumps(tables)}
                 """
             },
@@ -78,8 +79,16 @@ def postprocess_sql_query(query, tables: list[Table], max_num_lines = 1000):
     # Replace the table PROMPT names with the real table names
     postprocessed_query = query
     for table in tables:
+
+        # Try to replace column name double quoted ""
         postprocessed_query = postprocessed_query.replace(
+            f'"{table.name}"',
             table.name,
+        )
+
+        # Replace the column 
+        postprocessed_query = postprocessed_query.replace(
+            f'{table.name}',
             f'"{table.metadata.database}"."{table.metadata.schema}"."{table.metadata.name}"'
         )
 
