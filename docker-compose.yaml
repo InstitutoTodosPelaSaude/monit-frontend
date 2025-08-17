@@ -1,20 +1,4 @@
 services:
-  mongodb:
-    build: ./mongodb
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
-      MONGO_APP_DB: ${MONGO_APP_DB}
-      MONGO_APP_USER: ${MONGO_APP_USER}
-      MONGO_APP_PASS: ${MONGO_APP_PASS}
-    command: ["mongod", "--config", "/etc/mongo/mongod.conf", "--port", "${MONGO_PORT}"]
-    ports:
-      - "${MONGO_PORT}:${MONGO_PORT}"
-    volumes:
-      - ./mongodb/data:/data/db
-      - ./mongodb/mongod.conf:/etc/mongo/mongod.conf:ro
-      - ./mongodb/init:/docker-entrypoint-initdb.d:ro
-
   monit-chat-api:
     build:
       context: .
@@ -25,3 +9,5 @@ services:
       - "${APP_PORT}:8000"
     volumes:
       - ./monit-chat-api/app:/app/app
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

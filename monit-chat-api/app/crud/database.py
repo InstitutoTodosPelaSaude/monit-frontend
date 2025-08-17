@@ -20,13 +20,14 @@ class MongoConnection:
         
         if cls._client is None:
             mongo_port = os.getenv("MONGO_PORT", "27018")
+            mongo_host = os.getenv("MONGO_HOST", "mongodb")
             mongo_app_user = os.getenv("MONGO_APP_USER", "appuser")
             mongo_app_pass = os.getenv("MONGO_APP_PASS", "password")
 
-            mongo_uri = os.getenv(
-                "MONGO_URI",
-                f"mongodb://{mongo_app_user}:{mongo_app_pass}@mongodb:{mongo_port}/{mongo_app_db}?authSource={mongo_app_db}"
-            )
+            print(f"Trying to connect to mongodb://{mongo_app_user}:{mongo_app_pass}@{mongo_host}:{mongo_port}/{mongo_app_db}?authSource={mongo_app_db}")
+
+            mongo_uri = f"mongodb://{mongo_app_user}:{mongo_app_pass}@{mongo_host}:{mongo_port}/{mongo_app_db}?authSource={mongo_app_db}"
+        
 
             cls._client = pymongo.MongoClient(mongo_uri)
         
