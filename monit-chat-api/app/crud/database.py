@@ -24,11 +24,7 @@ class MongoConnection:
             mongo_app_user = os.getenv("MONGO_APP_USER", "appuser")
             mongo_app_pass = os.getenv("MONGO_APP_PASS", "password")
 
-            print(f"Trying to connect to mongodb://{mongo_app_user}:{mongo_app_pass}@{mongo_host}:{mongo_port}/{mongo_app_db}?authSource={mongo_app_db}")
-
             mongo_uri = f"mongodb://{mongo_app_user}:{mongo_app_pass}@{mongo_host}:{mongo_port}/{mongo_app_db}?authSource={mongo_app_db}"
-        
-
             cls._client = pymongo.MongoClient(mongo_uri)
         
         return cls._client[mongo_app_db]
