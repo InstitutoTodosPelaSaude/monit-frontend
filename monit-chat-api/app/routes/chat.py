@@ -3,7 +3,7 @@ from typing import Annotated
 
 from app.schemas.chat import TableCreate
 from app.models.user import User
-from app.crud.chat import create_chat, create_user_message, read_chat_by_id, create_table, list_tables
+from app.crud.chat import create_chat, create_user_message, read_chat_by_id, create_table, list_tables, list_chat_ids_and_names_by_user_id
 from app.crud.users import get_current_user_from_jwt_token
 from app.crud.query import read_query_by_id
 
@@ -69,7 +69,23 @@ async def get_chat_route(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=str(e)
         )
+
+@router.get("", summary="Busca um chat por ID")
+async def get_all_chats_route(
+    current_user: Annotated[User, Depends(get_current_user_from_jwt_token)]
+):
+    user_id = current_user.id
+    try:
+        chats = await list_chat_ids_and_names_by_user_id(user_id)
+        return chats
+    except UserIDNotFound as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e)
+        )
     
+    
+
 @router.post("/table", status_code=status.HTTP_201_CREATED, summary="Cria uma nova tabela")
 async def create_table_route(
     current_user: Annotated[User, Depends(get_current_user_from_jwt_token)],

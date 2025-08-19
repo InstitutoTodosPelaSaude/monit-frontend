@@ -1,5 +1,5 @@
 from app.models.chat import Chat, UserMessage, ChatBotMessage, Table
-from app.schemas.chat import TableCreate
+from app.schemas.chat import TableCreate, ChatBasicIdentifiers
 
 from app.crud.database import MongoConnection
 from app.crud.exceptions import ChatIDNotFound, TableAlreadyExists
@@ -78,6 +78,21 @@ async def update_chat_name(chat_id: str, new_name: str):
 
     updated_chat = await read_chat_by_id(chat_id)
     return updated_chat
+
+async def list_chat_ids_and_names_by_user_id(user_id: str) -> list[ChatBasicIdentifiers]:
+    db = MongoConnection.get_client()
+    db_collection = db.chat
+
+    chats = db_collection.find(
+        {"user_id": user_id, "type": "CHAT"}, 
+        {"_id": 1, "name": 1,}
+    )
+    return [
+        ChatBasicIdentifiers(
+            chat_id=str(chat["_id"]),
+            name=chat["name"]
+        ) for chat in chats
+    ]
 
 async def create_table(payload: TableCreate) -> Table:
     db = MongoConnection.get_client()

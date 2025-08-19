@@ -17,3 +17,7 @@ class TableCreate(BaseModel):
     columns: List[TableColumnCreate] = Field(..., description="Lista de colunas que compõem a tabela")
     observations: List[str] = Field(default_factory=list, description="Observações ou comentários adicionais sobre a tabela")
     metadata: TableMetadataCreate = Field(..., description="Metadados de schema e banco de dados da tabela")
+
+class ChatBasicIdentifiers(BaseModel):
+    chat_id: str = Field(..., description="ID do chat")
+    name: str = Field(..., description="Nome do chat")

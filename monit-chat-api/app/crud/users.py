@@ -95,7 +95,7 @@ def create_access_token(data: dict):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-async def get_current_user_from_jwt_token(token: Annotated[str, Depends(oauth2_scheme)]):
+async def get_current_user_from_jwt_token(token: Annotated[str, Depends(oauth2_scheme)]) -> User:
 
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
