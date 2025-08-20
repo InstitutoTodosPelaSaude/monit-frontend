@@ -15,6 +15,7 @@ from app.services.query_execution import trigger_query_execution_flow
 
 import json
 import sqlparse
+from datetime import datetime
 
 client = OpenAI()
 
@@ -61,10 +62,11 @@ def generate_sql_query_to_answer_question(chat_history, tables: list[Table]):
             {
                 "role": "system", 
                 "content": f"""
-                    Your purpose is to write SQL queries to respond user questions. 
+                    Your purpose is to write Postgres SQL queries to respond user questions. 
                     Based on the data dictionary provided and the chat history, create a new SQL query to respond the user's request. 
                     If the user doesn't make valid question, mark is_a_valid_sql_question with false.
-                    Always double-quote thecolumns used.
+                    Always double-quote thecolumns used. Never use LIKE to compare dates.
+                    If the user query references dates (ex. last week, current year), this is the current date: {datetime.now().strftime('%Y-%m-%d')}.
                     Data dictonary: {json.dumps(tables)}
                 """
             },

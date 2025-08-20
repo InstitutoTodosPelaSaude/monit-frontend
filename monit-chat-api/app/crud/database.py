@@ -64,6 +64,14 @@ class PostgresConnection:
         )
         psycopg2.extensions.register_type(DATE_as_datetime)
 
+        # DECIMAL/NUMERIC → float
+        DECIMAL_as_float = psycopg2.extensions.new_type(
+            (1700,),  # NUMERIC OID
+            "NUMERIC",
+            lambda value, cursor: None if not value else float(value)
+        )
+        psycopg2.extensions.register_type(DECIMAL_as_float)
+
     def execute_query(self, query, params=None):
         """
         Executes a SQL query and returns the result as a list of dicts.
