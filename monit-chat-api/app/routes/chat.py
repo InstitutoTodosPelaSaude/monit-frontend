@@ -101,7 +101,9 @@ async def create_table_route(
         )
     
 @router.get("/table/", summary="Lista todas as tabelas cadastradas")
-async def list_tables_route():
+async def list_tables_route(
+    current_user: Annotated[User, Depends(get_current_user_from_jwt_token)]
+):
     docs = await list_tables()
     return docs
 

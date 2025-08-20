@@ -33,7 +33,25 @@ async def trigger_query_execution_flow(
     
     tables = await list_tables()
     postprocessed_query = postprocess_sql_query(generated_query, tables)
-    query_result = await execute_query(postprocessed_query, query_id)
+
+    try:
+        query_result = await execute_query(postprocessed_query, query_id)
+    except Exception as e:
+        query_result = QueryResult(
+            query_id=query_id,
+            data=[],
+            columns=[],
+            status="error"
+        )
+
+        await update_query_result(
+            QueryUpdateResult(
+                id=query.id,
+                query_result=query_result
+            )
+        )
+
+        return query_result
 
     await update_query_result(
         QueryUpdateResult(

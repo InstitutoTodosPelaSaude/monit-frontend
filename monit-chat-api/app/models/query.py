@@ -29,6 +29,7 @@ class QueryResult(BaseModel):
     )
     query_id: str
     last_executed_at: datetime = Field(default_factory=datetime.now)
+    status: Literal["success", "error"] = "success"
     data: list[Any]
     columns: list[str]
 

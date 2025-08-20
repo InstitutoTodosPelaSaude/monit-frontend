@@ -52,7 +52,7 @@ async def select_tables_to_answer_question(chat_history) -> list[Table]:
 def generate_sql_query_to_answer_question(chat_history, tables: list[Table]):
 
     if not tables:
-        return SQLGeneratedResponse()
+        return SQLQuery(query="<INVALID>"), False
     
     tables = [ table.json_data_dictionary for table in tables ]
     response = client.responses.parse(
