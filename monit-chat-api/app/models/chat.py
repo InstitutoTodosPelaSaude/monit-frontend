@@ -2,9 +2,8 @@ from datetime import datetime
 from pydantic import BaseModel, Field, EmailStr, field_validator, model_validator, model_serializer, AliasChoices
 from typing import Tuple, Any, Literal
 import hashlib
-import secrets
 
-from app.models.query import SQLGeneratedResponse, SQLQuery
+from app.models.query import  SQLQuery
 
 # =======================
 # TABLE MODELS

@@ -13,6 +13,7 @@ class SQLTableSelectionResponse(BaseModel):
 
 class SQLGeneratedResponse(BaseModel):
     query: str = "<INVALID>"
+    name: str = "<QUERY-NAME>"
     is_a_valid_sql_question: bool = False
 
     @model_validator(mode='after')
@@ -39,6 +40,7 @@ class SQLQuery(BaseModel):
         validation_alias=AliasChoices('id', '_id')
     )
     query: str
+    name: str | None = "<QUERY-NAME>"
     type: Literal["QUERY"] = "QUERY"
     query_result: QueryResult | None = None
 
