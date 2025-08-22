@@ -41,6 +41,20 @@ async def list_users_route( current_user: Annotated[User, Depends(get_current_us
     docs = await list_users()
     return [UserOut(id=str(d.id), email=d.email, name=d.name, is_active=d.is_active) for d in docs]
 
+@router.get("/me/", response_model=UserOut, summary="")
+async def list_users_me_route(
+    current_user: Annotated[User, Depends(get_current_user_from_jwt_token)]
+):
+    """
+    Retorna o usuário autenticado.
+    """
+    return UserOut(
+        email=current_user.email,
+        name=current_user.name,
+        is_active=current_user.is_active,
+        favorite_queries_ids=current_user.favorite_queries_ids
+    )
+
 @auth_router.post("/token")
 async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]) -> Token:
     

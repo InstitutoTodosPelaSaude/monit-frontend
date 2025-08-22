@@ -1,8 +1,6 @@
 from datetime import datetime
 from pydantic import BaseModel, Field, EmailStr, field_validator, model_validator, model_serializer
 from typing import Tuple, Any
-import hashlib
-import secrets
 
 class User(BaseModel):
     id: str | None = Field(default=None, serialization_alias="_id")
@@ -12,6 +10,8 @@ class User(BaseModel):
     is_active: bool = True
     created_at: datetime = Field(default_factory=datetime.now)
     updated_at: datetime = Field(default_factory=datetime.now)
+    
+    favorite_queries_ids: list[str] | None = Field(default_factory=list)
 
     password: str
 

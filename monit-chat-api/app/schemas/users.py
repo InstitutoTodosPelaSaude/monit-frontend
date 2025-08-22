@@ -9,6 +9,7 @@ class UserOut(BaseModel):
     email: EmailStr
     name: str | None
     is_active: bool = True
+    favorite_queries_ids: list[str] = Field(default_factory=list)
 
 class Token(BaseModel):
     access_token: str

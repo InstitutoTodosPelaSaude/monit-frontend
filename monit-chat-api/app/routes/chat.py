@@ -5,7 +5,7 @@ from app.schemas.chat import TableCreate
 from app.models.user import User
 from app.crud.chat import create_chat, create_user_message, read_chat_by_id, create_table, list_tables, list_chat_ids_and_names_by_user_id
 from app.crud.users import get_current_user_from_jwt_token
-from app.crud.query import read_query_by_id
+from app.crud.query import read_query_by_id, read_user_queries, favorite_query, remove_favorite_query
 
 from app.crud.exceptions import UserIDNotFound, ChatIDNotFound, TableAlreadyExists
 from app.crud.exceptions import QueryIDNotFound, QueryCannotBeExecuted
@@ -107,7 +107,7 @@ async def list_tables_route(
     docs = await list_tables()
     return docs
 
-@router.get("/query/result", summary="Executa uma consulta e recupera os dados dela.")
+@router.get("/query/result/", summary="Executa uma consulta e recupera os dados dela.")
 async def get_data_from_query(
     current_user: Annotated[User, Depends(get_current_user_from_jwt_token)],
     query_id: str,
@@ -128,3 +128,25 @@ async def get_data_from_query(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e)
         )
+    
+@router.get("/query/", summary="Recupera as consultas SQL geradas pelo chatbot.")
+async def get_queries(
+    current_user: Annotated[User, Depends(get_current_user_from_jwt_token)]
+):
+    queries = await read_user_queries(current_user.id)
+    return queries
+
+@router.post("/query/favorite_query")
+async def favorite_query_route(
+    current_user: Annotated[User, Depends(get_current_user_from_jwt_token)],
+    query_id: str
+):
+    return await favorite_query(current_user.id, query_id)
+
+
+@router.delete("/query/favorite_query")
+async def remove_favorite_query_route(
+    current_user: Annotated[User, Depends(get_current_user_from_jwt_token)],
+    query_id: str
+):
+    return await remove_favorite_query(current_user.id, query_id)
