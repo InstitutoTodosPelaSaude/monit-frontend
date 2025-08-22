@@ -1,11 +1,12 @@
 from fastapi import APIRouter, HTTPException, Query, status, Depends, Query
+from fastapi.responses import StreamingResponse
 from typing import Annotated
 
 from app.schemas.chat import TableCreate
 from app.models.user import User
 from app.crud.chat import create_chat, create_user_message, read_chat_by_id, create_table, list_tables, list_chat_ids_and_names_by_user_id
 from app.crud.users import get_current_user_from_jwt_token
-from app.crud.query import read_query_by_id, read_user_queries, favorite_query, remove_favorite_query
+from app.crud.query import read_query_by_id, read_user_queries, favorite_query, remove_favorite_query, read_query_result_as_file_buffer
 
 from app.crud.exceptions import UserIDNotFound, ChatIDNotFound, TableAlreadyExists
 from app.crud.exceptions import QueryIDNotFound, QueryCannotBeExecuted
@@ -128,7 +129,38 @@ async def get_data_from_query(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e)
         )
-    
+
+@router.get("/query/result/file/", summary="Recupera os dados da consulta como um arquivo.")
+async def get_query_result_data_file(
+    current_user: Annotated[User, Depends(get_current_user_from_jwt_token)],
+    query_id: str,
+    execute_query: bool = Query(True)
+):
+    try:
+        if execute_query:
+            await trigger_query_execution_flow(query_id)
+            
+        file_buffer = await read_query_result_as_file_buffer(query_id)
+        
+        return StreamingResponse(
+            file_buffer,
+            media_type="text/csv",
+            headers={
+                "Content-Disposition": f"attachment; filename=query_{query_id}_result.csv"
+            }
+        )
+
+    except QueryIDNotFound as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e)
+        )
+    except QueryCannotBeExecuted as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+
 @router.get("/query/favorite_query/", summary="Recupera as consultas SQL geradas pelo chatbot.")
 async def get_queries(
     current_user: Annotated[User, Depends(get_current_user_from_jwt_token)]

@@ -5,6 +5,8 @@ from app.crud.users import read_user_by_id
 from app.schemas.query import QueryUpdateResult
 from pprint import pprint
 
+from io import BytesIO
+
 async def create_sql_query( query: SQLQuery ) -> SQLQuery:
     db = MongoConnection.get_client()
     db_collection = db.chat
@@ -32,6 +34,27 @@ async def read_query_by_id(query_id: str) -> SQLQuery:
     )
 
     return query
+
+async def read_query_result_as_file_buffer(query_id: str):
+
+    query = await read_query_by_id(query_id)
+    if not query.query_result:
+        return None
+
+    # Create a CSV buffer only manipulating strings
+    csv_buffer = BytesIO()
+    # Write the header
+    header = ",".join(query.query_result.columns) + "\n"
+    csv_buffer.write(header.encode())
+    # Write the rows
+    for row in query.query_result.data:
+        row_str = ',"'.join(map(str, row))
+        row_str = f'"{row_str}"\n'
+        csv_buffer.write(row_str.encode())
+    # Reset the buffer's position to the beginning
+    csv_buffer.seek(0)
+    
+    return csv_buffer
 
 async def read_user_queries(user_id: str) -> list[SQLQuery]:
     
