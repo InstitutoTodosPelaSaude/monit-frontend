@@ -44,7 +44,7 @@ async def read_user_queries(user_id: str) -> list[SQLQuery]:
     query_result = db_collection.find(
         {
             "type": "QUERY",
-            #"_id": {"$in": queries_ids}
+            "_id": {"$in": queries_ids}
         },
     )
 

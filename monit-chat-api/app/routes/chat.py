@@ -129,7 +129,7 @@ async def get_data_from_query(
             detail=str(e)
         )
     
-@router.get("/query/", summary="Recupera as consultas SQL geradas pelo chatbot.")
+@router.get("/query/favorite_query/", summary="Recupera as consultas SQL geradas pelo chatbot.")
 async def get_queries(
     current_user: Annotated[User, Depends(get_current_user_from_jwt_token)]
 ):
