@@ -1,8 +1,8 @@
 from app.models.chat import Chat, UserMessage, ChatBotMessage, Table
-from app.schemas.chat import TableCreate, ChatBasicIdentifiers
+from app.schemas.chat import TableCreate, ChatBasicIdentifiers, TableUpdate
 
 from app.crud.database import MongoConnection
-from app.crud.exceptions import ChatIDNotFound, TableAlreadyExists
+from app.crud.exceptions import ChatIDNotFound, TableAlreadyExists, TableIDNotFound
 from app.crud.users import read_user_by_id
 
 # from app.services.chat_flow import trigger_chatbot_response_flow
@@ -113,3 +113,33 @@ async def list_tables() -> list[Table]:
 
     docs = db_collection.find({'type': 'TABLE'})
     return [Table(**doc) for doc in docs]
+
+async def read_table_by_id(table_id: str) -> Table:
+    db = MongoConnection.get_client()
+    db_collection = db.chat
+
+    table = db_collection.find_one({'_id': table_id, 'type': 'TABLE'})
+    if table:
+        return Table(**table)
+
+    raise TableIDNotFound(table_id)
+
+async def update_table(payload: TableUpdate) -> Table:
+    db = MongoConnection.get_client()
+    db_collection = db.chat
+
+    table_id = payload.name
+    original_table = await read_table_by_id(table_id)
+
+    original_table.description = payload.description or original_table.description
+    original_table.observations = payload.observations or original_table.observations
+    
+    columns_in_update_payload = {col.name: col for col in payload.columns}
+    for col in original_table.columns:
+        if col.name in columns_in_update_payload:
+            col.description = columns_in_update_payload[col.name].description or col.description
+    
+    db_collection.update_one({"_id": table_id}, {"$set": original_table.dict()})
+    
+    updated_table = await read_table_by_id(table_id)
+    return Table(**updated_table.dict())

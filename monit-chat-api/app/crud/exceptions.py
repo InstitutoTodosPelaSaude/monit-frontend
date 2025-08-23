@@ -23,6 +23,11 @@ class TableAlreadyExists(Exception):
         message = f"Tabela com nome='{table}' já existe."
         super().__init__(message)
 
+class TableIDNotFound(Exception):
+    def __init__(self, id: str):
+        message = f"Tabela com ID='{id}' não encontrada."
+        super().__init__(message)
+
 class QueryIDNotFound(Exception):
     def __init__(self, id: str):
         message = f"Query com ID='{id}' não encontrada."

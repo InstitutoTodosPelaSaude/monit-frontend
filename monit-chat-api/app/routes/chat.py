@@ -2,13 +2,13 @@ from fastapi import APIRouter, HTTPException, Query, status, Depends, Query
 from fastapi.responses import StreamingResponse
 from typing import Annotated
 
-from app.schemas.chat import TableCreate
+from app.schemas.chat import TableCreate, TableUpdate
 from app.models.user import User
-from app.crud.chat import create_chat, create_user_message, read_chat_by_id, create_table, list_tables, list_chat_ids_and_names_by_user_id
+from app.crud.chat import create_chat, create_user_message, read_chat_by_id, create_table, list_tables, update_table, list_chat_ids_and_names_by_user_id
 from app.crud.users import get_current_user_from_jwt_token
 from app.crud.query import read_query_by_id, read_user_queries, favorite_query, remove_favorite_query, read_query_result_as_file_buffer
 
-from app.crud.exceptions import UserIDNotFound, ChatIDNotFound, TableAlreadyExists
+from app.crud.exceptions import UserIDNotFound, ChatIDNotFound, TableAlreadyExists, TableIDNotFound
 from app.crud.exceptions import QueryIDNotFound, QueryCannotBeExecuted
 
 from app.services.chat_flow import trigger_chatbot_response_flow
@@ -107,6 +107,26 @@ async def list_tables_route(
 ):
     docs = await list_tables()
     return docs
+
+@router.put("/table/", summary="Atualiza uma tabela existente")
+async def update_table_route(
+    current_user: Annotated[User, Depends(get_current_user_from_jwt_token)],
+    table_id: str = Query(..., description="ID da tabela a ser atualizada"),
+    payload: TableUpdate = ...
+):
+    try:
+        table = await update_table(payload)
+        return table
+    except TableIDNotFound as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e)
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e)#"Erro interno ao atualizar tabela."
+        )
 
 @router.get("/query/result/", summary="Executa uma consulta e recupera os dados dela.")
 async def get_data_from_query(
