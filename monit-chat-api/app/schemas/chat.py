@@ -15,7 +15,7 @@ class TableCreate(BaseModel):
     name: str = Field(..., description="Nome único da tabela")
     description: str = Field(..., description="Descrição geral da tabela e seu propósito")
     columns: List[TableColumnCreate] = Field(..., description="Lista de colunas que compõem a tabela")
-    observations: List[str] = Field(default_factory=list, description="Observações ou comentários adicionais sobre a tabela")
+    observations: str = Field(default="", description="Observações ou comentários adicionais sobre a tabela")
 
     metadata: TableMetadataCreate = Field(..., description="Metadados de schema e banco de dados da tabela")
 
@@ -26,7 +26,7 @@ class TableColumnUpdate(BaseModel):
 class TableUpdate(BaseModel):
     name: str = Field(..., description="Nome único da tabela")
     description: str = Field(default=None, description="Descrição geral da tabela e seu propósito")
-    observations: List[str] = Field(default_factory=list, description="Observações ou comentários adicionais sobre a tabela")
+    observations: str = Field(default=None, description="Observações ou comentários adicionais sobre a tabela")
     columns: List[TableColumnUpdate] = Field(default_factory=list, description="Lista de colunas que compõem a tabela")
 
 class ChatBasicIdentifiers(BaseModel):

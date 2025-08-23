@@ -27,7 +27,7 @@ class Table(BaseModel):
     name: str
     description: str
     columns: list[TableColumn]
-    observations: list[str]
+    observations: str | None = None
     type: Literal["TABLE"] = "TABLE"
 
     metadata: TableDatabaseMetadata
