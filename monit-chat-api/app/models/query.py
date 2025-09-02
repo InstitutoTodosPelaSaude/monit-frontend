@@ -1,5 +1,5 @@
 from pydantic import BaseModel, model_validator
-from typing import Literal, Any
+from typing import Literal, Any, List, Dict
 
 from datetime import datetime
 from pydantic import BaseModel, Field, model_validator, model_serializer, AliasChoices
@@ -9,7 +9,7 @@ class GenereateNameForChatResponse(BaseModel):
     name: str
 
 class SQLTableSelectionResponse(BaseModel):
-    tables: list[str]
+    tables: List[str]
 
 class SQLGeneratedResponse(BaseModel):
     query: str = "<INVALID>"
@@ -31,8 +31,8 @@ class QueryResult(BaseModel):
     query_id: str
     last_executed_at: datetime = Field(default_factory=datetime.now)
     status: Literal["success", "error"] = "success"
-    data: list[Any]
-    columns: list[str]
+    data: List[Any]
+    columns: List[str]
 
 class SQLQuery(BaseModel):
     id: str = Field(
@@ -45,7 +45,7 @@ class SQLQuery(BaseModel):
     query_result: QueryResult | None = None
 
     @model_serializer
-    def serialize_model(self) -> dict[str, Any]:
+    def serialize_model(self) -> Dict[str, Any]:
         dict_repr = dict(self)
         dict_repr['_id'] = dict_repr['id']
         del dict_repr['id']

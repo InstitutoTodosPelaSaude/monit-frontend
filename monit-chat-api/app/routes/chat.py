@@ -39,7 +39,7 @@ async def create_chat_route(
             detail="Erro interno ao criar chat."
         )
 
-@router.post("/message", summary="Cria uma mensagem em um chat", status_code=status.HTTP_201_CREATED)
+@router.post("/message/", summary="Cria uma mensagem em um chat", status_code=status.HTTP_201_CREATED)
 async def create_chat_message_route(
     current_user: Annotated[User, Depends(get_current_user_from_jwt_token)],
     chat_id: str = Query(..., description="ID do usuário para associar ao chat"),
@@ -188,7 +188,7 @@ async def get_queries(
     queries = await read_user_queries(current_user.id)
     return queries
 
-@router.post("/query/favorite_query")
+@router.post("/query/favorite_query/")
 async def favorite_query_route(
     current_user: Annotated[User, Depends(get_current_user_from_jwt_token)],
     query_id: str
@@ -196,7 +196,7 @@ async def favorite_query_route(
     return await favorite_query(current_user.id, query_id)
 
 
-@router.delete("/query/favorite_query")
+@router.delete("/query/favorite_query/")
 async def remove_favorite_query_route(
     current_user: Annotated[User, Depends(get_current_user_from_jwt_token)],
     query_id: str

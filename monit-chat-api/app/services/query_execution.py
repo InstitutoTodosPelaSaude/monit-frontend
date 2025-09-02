@@ -24,7 +24,7 @@ async def execute_query(sql_query: str, query_id: str) -> QueryResult:
     return query_result
 
 async def trigger_query_execution_flow(
-    query_id: SQLQuery
+    query_id: str
 ):
     query = await read_query_by_id(query_id)
     generated_query = query.query

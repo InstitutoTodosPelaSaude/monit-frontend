@@ -1,6 +1,6 @@
 from datetime import datetime
 from pydantic import BaseModel, Field, EmailStr, field_validator, model_validator, model_serializer, AliasChoices
-from typing import Tuple, Any, Literal
+from typing import Tuple, Any, Literal, List, Dict
 import hashlib
 
 from app.models.query import  SQLQuery
@@ -26,7 +26,7 @@ class Table(BaseModel):
     id: str | None = Field(default=None, serialization_alias="_id")
     name: str
     description: str
-    columns: list[TableColumn]
+    columns: List[TableColumn]
     observations: str | None = None
     type: Literal["TABLE"] = "TABLE"
 
@@ -38,7 +38,7 @@ class Table(BaseModel):
         return self
     
     @model_serializer
-    def serialize_model(self) -> dict[str, Any]:
+    def serialize_model(self) -> Dict[str, Any]:
         dict_repr = dict(self)
         dict_repr['_id'] = dict_repr['id']
         del dict_repr['id']
@@ -63,7 +63,7 @@ class ChatBotMessage(BaseModel):
     created_at: datetime = Field(default_factory=datetime.now)
 
     generated_query: SQLQuery
-    tables_used_in_query: list[Table] | None = None
+    tables_used_in_query: List[Table] | None = None
     postprocessed_query: str | None = None
 
 class Chat(BaseModel):
@@ -71,7 +71,7 @@ class Chat(BaseModel):
     id: str | None = Field(default=None, serialization_alias="_id", validation_alias=AliasChoices('id', '_id'))
     user_id: str
     name: str = Field(default=NEW_CHAT_DEFAULT_NAME)
-    messages: list[UserMessage | ChatBotMessage] = Field(default_factory=list)
+    messages: List[UserMessage | ChatBotMessage] = Field(default_factory=list)
     type: Literal["CHAT"] = "CHAT"
 
     @model_validator(mode='after')
@@ -81,7 +81,7 @@ class Chat(BaseModel):
         return self
     
     @model_serializer
-    def serialize_model(self) -> dict[str, Any]:
+    def serialize_model(self) -> Dict[str, Any]:
         dict_repr = dict(self)
         dict_repr['_id'] = dict_repr['id']
         del dict_repr['id']

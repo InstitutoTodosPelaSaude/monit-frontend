@@ -10,16 +10,15 @@ from app.models.chat import Table, ChatBotMessage, Chat, NEW_CHAT_DEFAULT_NAME
 
 from app.crud.chat import read_chat_by_id, create_bot_reply_message, list_tables, update_chat_name
 from app.crud.query import create_sql_query
-from app.services.query_utils import postprocess_sql_query, check_if_query_is_read_only
+from app.services.query_utils import postprocess_sql_query, check_if_query_is_read_only, identate_query
 from app.services.query_execution import trigger_query_execution_flow
 
 import json
-import sqlparse
 from datetime import datetime
 
 client = OpenAI()
 
-async def select_tables_to_answer_question(chat_history) -> list[Table]:
+async def select_tables_to_answer_question(chat_history) -> List[Table]:
 
     db = MongoConnection.get_client()
     db_collection = db.chat
@@ -50,7 +49,7 @@ async def select_tables_to_answer_question(chat_history) -> list[Table]:
     
     return selected_tables
 
-def generate_sql_query_to_answer_question(chat_history, tables: list[Table]):
+def generate_sql_query_to_answer_question(chat_history, tables: List[Table]):
 
     if not tables:
         return SQLQuery(query="<INVALID>"), False
@@ -129,6 +128,7 @@ async def trigger_chatbot_response_flow(
     await create_new_chat_name(chat_id)
 
     postprocessed_query = postprocess_sql_query(generated_query.query, tables)
+    generated_query.query = identate_query(generated_query.query)
     new_message = ChatBotMessage(
         generated_query=generated_query, 
         postprocessed_query=postprocessed_query,

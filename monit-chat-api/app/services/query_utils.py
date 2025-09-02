@@ -1,8 +1,13 @@
 
 import sqlparse
 from app.models.chat import Table
+from typing import List
 
-def postprocess_sql_query(query, tables: list[Table], max_num_lines = 1000):
+def identate_query(query: str):
+    formated_query = sqlparse.format(query, reindent=True, keyword_case='upper')
+    return formated_query
+
+def postprocess_sql_query(query, tables: List[Table], max_num_lines = 1000):
 
     # Replace the table PROMPT names with the real table names
     postprocessed_query = query
@@ -25,7 +30,7 @@ def postprocess_sql_query(query, tables: list[Table], max_num_lines = 1000):
     postprocessed_query = f'SELECT * FROM ({postprocessed_query}) AS query_limit_num_of_lines LIMIT {max_num_lines}'
 
     # Ident Query
-    postprocessed_query = sqlparse.format(postprocessed_query, reindent=True, keyword_case='upper')
+    postprocessed_query = identate_query(postprocessed_query)
 
     return postprocessed_query
 
