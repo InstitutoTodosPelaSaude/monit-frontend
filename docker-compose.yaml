@@ -1,34 +1,13 @@
-version: '2'
 services:
-
-  streamlit:
-    build: ./streamlit
+  monit-chat-api:
+    build:
+      context: .
+      dockerfile: monit-chat-api/Dockerfile
     env_file:
       - .env
+    ports:
+      - "${APP_PORT}:8000"
     volumes:
-      - ./streamlit:/streamlit
-      - ./data:/data
-      - ./streamlit/.streamlit:/root/.streamlit
-    ports:
-      - "8510:8501"
-
-  query:
-    build: ./query
-    env_file:
-      - .env
-    volumes:
-      - ./query/app:/app
-    ports:
-      - "8800:8000"
-
-  nginx:
-    build: ./nginx
-    env_file:
-      - .env
-    environment:
-      BASIC_USERNAME: ${DAGSTER_UI_USERNAME}
-      BASIC_PASSWORD: ${DAGSTER_UI_PASSWORD}
-    depends_on:
-      - streamlit
-    ports:
-      - "8502:8502"
+      - ./monit-chat-api/app:/app/app
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
