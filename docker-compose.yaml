@@ -11,3 +11,10 @@ services:
       - ./monit-chat-api/app:/app/app
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    networks:
+      - shared-network
+      - default
+
+networks:
+  shared-network:
+    external: true
